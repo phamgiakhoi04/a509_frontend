@@ -1,95 +1,167 @@
-import { FormEvent, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import Button from "@/components/ui/Button";
+import { authApi } from "@/api/auth";
+import type { User } from "@/types/models";
+// Import Modal đăng nhập/đăng ký
+import AuthModal from "@/components/auth/AuthModal";
 
+// Danh sách menu
 const nav = [
-  { to: "/gioi-thieu", label: "Giới thiệu" },
-  { to: "/phuc-dung", label: "Phục dựng" },
-  { to: "/quan-trang", label: "Quân trang" },
-  { to: "/tai-lieu", label: "Tài liệu" },
-  { to: "/tin-tuc", label: "Tin tức" },
-  { to: "/lien-he", label: "Liên hệ" },
+  { to: "/gioi-thieu", label: "GIỚI THIỆU" },
+  { to: "/phuc-dung", label: "PHỤC DỰNG" },
+  { to: "/quan-trang", label: "QUÂN TRANG" },
+  { to: "/tai-lieu", label: "TÀI LIỆU" },
+  { to: "/tin-tuc", label: "TIN TỨC" },
+  { to: "/lien-he", label: "LIÊN HỆ" },
 ];
 
 export default function Header() {
-  const [q, setQ] = useState("");
-  const [user, setUser] = useState("");
-  const [pass, setPass] = useState("");
-  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false); // State bật/tắt Modal
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State bật/tắt menu Mobile
 
-  function onSearch(e: FormEvent) {
-    e.preventDefault();
-    const query = q.trim();
-    if (!query) return;
-    navigate(`/tim-kiem?q=${encodeURIComponent(query)}`);
-  }
+  // Kiểm tra trạng thái đăng nhập khi load trang
+  useEffect(() => {
+    const user = authApi.getCurrentUser();
+    if (user) setCurrentUser(user);
+  }, []);
+
+  // Xử lý đăng xuất
+  const handleLogout = () => {
+    authApi.logout();
+    setCurrentUser(null);
+  };
 
   return (
-    <header className="sticky top-0 z-20 bg-slate-50/85 backdrop-blur border-b border-slate-200">
-      <div className="container-page py-3">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white ring-1 ring-slate-200 shadow-soft">
-                Logo
-              </span>
-              <span className="hidden sm:inline">A509</span>
+    <>
+      {/* --- HEADER CHÍNH --- */}
+      <header className="sticky top-0 z-40 bg-brand-redDark shadow-pop text-white border-b-4 border-brand-yellow">
+        <div className="container-page py-3">
+          <div className="flex items-center justify-between">
+            
+            {/* 1. LOGO TRÒN (Về trang chủ) */}
+            <Link to="/" className="group relative z-50">
+              <div className="h-16 w-16 bg-brand-bg rounded-full border-4 border-brand-yellow flex items-center justify-center overflow-hidden shadow-lg group-hover:rotate-12 transition-transform hover:scale-110">
+                 {/* Lưu ý: Kiểm tra đúng tên file ảnh trong public/images/ */}
+                 <img src="/images/A509-vuong-org.png" className="w-12 h-12 object-cover" alt="Logo" />
+              </div>
             </Link>
 
-            <form onSubmit={onSearch} className="flex-1 md:w-[28rem]">
-              <div className="flex items-center gap-2 rounded-2xl bg-white ring-1 ring-slate-200 px-3 py-2 shadow-soft">
-                <span className="text-slate-400">⌕</span>
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Thanh search"
-                  className="w-full bg-transparent outline-none text-sm"
-                />
-              </div>
-            </form>
-          </div>
+            {/* 2. MENU DESKTOP */}
+            <nav className="hidden md:flex items-center gap-1 bg-brand-red/50 p-1.5 rounded-full border border-white/20">
+              {nav.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    [
+                      "px-4 py-1.5 rounded-full font-display font-bold text-sm transition-all whitespace-nowrap",
+                      isActive 
+                        ? "bg-brand-yellow text-brand-redDark shadow-md scale-105" 
+                        : "text-white hover:bg-white/20 hover:text-brand-yellow",
+                    ].join(" ")
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
 
-          <div className="flex items-center gap-2 justify-end">
-            <input
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              placeholder="Login / Username"
-              className="w-36 rounded-xl bg-white ring-1 ring-slate-200 px-3 py-2 text-sm outline-none"
-            />
-            <input
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Password"
-              type="password"
-              className="w-32 rounded-xl bg-white ring-1 ring-slate-200 px-3 py-2 text-sm outline-none"
-            />
-            <Button
-              type="button"
-              onClick={() => alert("Login placeholder (chưa có backend).")}
-              className="shrink-0"
+            {/* 3. KHU VỰC TÀI KHOẢN (LOGIN/USER INFO) */}
+            <div className="hidden md:block">
+              {currentUser ? (
+                // --- TRƯỜNG HỢP: ĐÃ ĐĂNG NHẬP ---
+                <div className="flex items-center gap-3 bg-brand-red/30 px-3 py-1 rounded-full border border-white/10">
+                  <div className="text-right">
+                    <div className="text-[10px] font-bold text-brand-yellow uppercase leading-tight">Xin chào</div>
+                    <div className="font-display font-bold text-sm leading-tight max-w-[100px] truncate">
+                      {currentUser.fullName || currentUser.username}
+                    </div>
+                  </div>
+                  
+                  {/* Avatar User */}
+                  <div className="h-9 w-9 rounded-full border-2 border-brand-yellow bg-white overflow-hidden">
+                    {currentUser.avatarUrl ? (
+                      <img src={currentUser.avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-brand-redDark font-black text-xs">
+                        {(currentUser.username[0] || "U").toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Nút thoát */}
+                  <button 
+                    onClick={handleLogout} 
+                    className="ml-1 text-xs font-bold text-white/70 hover:text-brand-yellow underline decoration-dotted"
+                  >
+                    Thoát
+                  </button>
+                </div>
+              ) : (
+                // --- TRƯỜNG HỢP: CHƯA ĐĂNG NHẬP ---
+                <Button 
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-brand-yellow text-brand-redDark hover:bg-white border-2 border-brand-redDark font-black shadow-md px-6"
+                >
+                  TÀI KHOẢN
+                </Button>
+              )}
+            </div>
+
+            {/* 4. NÚT MENU MOBILE (Hamburger) */}
+            <button 
+              className="md:hidden text-brand-yellow text-3xl leading-none pb-1" 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              Login
-            </Button>
+              ☰
+            </button>
           </div>
         </div>
+        
+        {/* --- MENU MOBILE DROPDOWN --- */}
+        {isMenuOpen && (
+            <div className="md:hidden bg-brand-redDark border-t border-brand-yellow p-4 space-y-2 animate-fade-in">
+                {nav.map(item => (
+                    <Link 
+                      key={item.to} 
+                      to={item.to} 
+                      className="block font-display font-bold text-white py-3 border-b border-white/10 hover:text-brand-yellow"
+                      onClick={() => setIsMenuOpen(false)} // Đóng menu khi click
+                    >
+                      {item.label}
+                    </Link>
+                ))}
+                
+                {/* Nút đăng nhập/Info trên mobile */}
+                <div className="pt-4">
+                  {currentUser ? (
+                    <div className="flex items-center justify-between text-white">
+                      <span className="font-bold">👤 {currentUser.fullName || currentUser.username}</span>
+                      <button onClick={handleLogout} className="text-brand-yellow underline">Đăng xuất</button>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-brand-yellow text-brand-redDark hover:bg-white border-2 border-brand-redDark font-black shadow-md px-6"
+                    >
+                      ĐĂNG NHẬP
+                    </Button>
+                  )}
+                </div>
+            </div>
+        )}
+      </header>
 
-        <nav className="mt-3 flex flex-wrap items-center gap-1">
-          {nav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                [
-                  "rounded-xl px-3 py-2 text-sm transition",
-                  isActive ? "bg-slate-900 text-white" : "hover:bg-slate-100",
-                ].join(" ")
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-    </header>
+      {/* --- MODAL AUTHENTICATION (Popup) --- */}
+      {/* Chỉ hiển thị khi showAuthModal = true */}
+      {showAuthModal && (
+        <AuthModal 
+          onClose={() => setShowAuthModal(false)} 
+          onLoginSuccess={(user) => setCurrentUser(user)}
+        />
+      )}
+    </>
   );
 }

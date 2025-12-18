@@ -4,11 +4,21 @@
 
 :root { color-scheme: light; }
 
-.container-page { @apply mx-auto w-full max-w-6xl px-4; }
+body {
+  /* Dùng màu kem của brand làm nền chủ đạo */
+  @apply bg-brand-bg text-brand-text antialiased;
+}
 
-a { @apply text-slate-900 hover:text-slate-700; }
+.container-page { 
+  @apply mx-auto w-full max-w-6xl px-4; 
+}
 
-/* tiny helpers */
-.prose-like p { @apply text-sm text-slate-700 leading-6; }
-.prose-like h2 { @apply text-lg font-semibold tracking-tight mt-6; }
-.prose-like ul { @apply list-disc pl-5 space-y-1 text-sm text-slate-700; }
+a { 
+  @apply text-brand-text hover:text-brand-red transition-colors font-medium; 
+}
+
+/* Typography cho các bài viết */
+.prose-like p { @apply text-base leading-7 text-brand-text mb-4; }
+.prose-like h2 { @apply text-2xl font-bold tracking-tight mt-8 mb-4 text-brand-red; }
+.prose-like ul { @apply list-disc pl-5 space-y-2 text-brand-text; }
+.prose-like strong { @apply font-bold text-brand-redDark; }
