@@ -26,9 +26,7 @@ export const authApi = {
   // 3. Quên mật khẩu (Gửi email yêu cầu)
   forgotPassword: async (email: string) => {
     // Backend dùng @RequestParam nên gửi qua params
-    const res = await client.post("/auth/forgot-password", null, {
-      params: { email },
-    });
+    const res = await client.post("/auth/forgot-password", { email });
     return res.data;
   },
 

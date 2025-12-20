@@ -1,71 +1,75 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 
-// Các trang chính
-import TrangChu from "@/pages/TrangChu";
-import GioiThieu from "@/pages/GioiThieu";
+// --- Auth Components ---
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
-// Phục dựng
-import PhucDung from "@/pages/phucdung/PhucDung";
-import PhucDungQuocGia from "@/pages/phucdung/PhucDungQuocGia";
-import PhucDungDonVi from "@/pages/phucdung/PhucDungDonVi";
-import PhucDungThoiKy from "@/pages/phucdung/PhucDungThoiKy";
+// --- Core Pages ---
+import HomePage from "@/pages/home/HomePage";
+import AboutPage from "@/pages/about/About"; 
 
-// Quân trang
-import QuanTrang from "@/pages/quantrang/QuanTrang";
-import QuanTrangLoai from "@/pages/quantrang/QuanTrangLoai";
-import QuanTrangMon from "@/pages/quantrang/QuanTrangMon";
+// --- Reenactment (Phục dựng) ---
+import ReenactmentPage from "@/pages/reenactment/ReenactmentPage";
+import CountryPage from "@/pages/reenactment/CountryPage";
+import UnitPage from "@/pages/reenactment/UnitPage";
+import PeriodPage from "@/pages/reenactment/PeriodPage";
 
-// Bài viết (Tin tức / Tài liệu)
-import DanhSachBaiViet from "@/pages/posts/DanhSachBaiViet";
-import ChiTietBaiViet from "@/pages/posts/ChiTietBaiViet";
+// --- Uniforms (Quân trang) ---
+import UniformsPage from "@/pages/uniforms/UniformsPage";
+import CategoryPage from "@/pages/uniforms/CategoryPage";
+import ItemPage from "@/pages/uniforms/ItemPage";
 
-// Các trang phụ
-import LienHe from "@/pages/LienHe";
-import TimKiem from "@/pages/TimKiem";
-import NotFound from "@/pages/NotFound";
+// --- Posts (Tin tức / Tài liệu) ---
+import PostListPage from "@/pages/posts/PostListPage";
+import PostDetailPage from "@/pages/posts/PostDetailPage";
 
-// Trang Đổi mật khẩu (Mới thêm)
-import ResetPasswordPage from "@/pages/ResetPasswordPage";
+// --- Utility Pages ---
+import ContactPage from "@/pages/Contact";
+import SearchPage from "@/pages/Search";
+import NotFoundPage from "@/pages/NotFound";
 
 export default function App() {
   return (
     <Routes>
-      {/* 1. Các trang có Header & Footer (Nằm trong Layout) */}
+      {/* 1. Layout chính (Có Header & Footer) */}
       <Route element={<Layout />}>
-        <Route path="/" element={<TrangChu />} />
-        <Route path="/gioi-thieu" element={<GioiThieu />} />
-
-        {/* Phục dựng */}
-        <Route path="/phuc-dung" element={<PhucDung />} />
-        <Route path="/phuc-dung/:countrySlug" element={<PhucDungQuocGia />} />
-        <Route path="/phuc-dung/:countrySlug/:unitSlug" element={<PhucDungDonVi />} />
-        <Route path="/phuc-dung/:countrySlug/:unitSlug/:periodSlug" element={<PhucDungThoiKy />} />
-
-        {/* Quân trang */}
-        <Route path="/quan-trang" element={<QuanTrang />} />
-        <Route path="/quan-trang/:categorySlug" element={<QuanTrangLoai />} />
-        <Route path="/quan-trang/:categorySlug/:itemSlug" element={<QuanTrangMon />} />
-
-        {/* Tài liệu */}
-        <Route path="/tai-lieu" element={<DanhSachBaiViet type="tai-lieu" />} />
-        <Route path="/tai-lieu/:slug" element={<ChiTietBaiViet type="tai-lieu" />} />
-
-        {/* Tin tức */}
-        <Route path="/tin-tuc" element={<DanhSachBaiViet type="tin-tuc" />} />
-        <Route path="/tin-tuc/:slug" element={<ChiTietBaiViet type="tin-tuc" />} />
-
-        {/* Khác */}
-        <Route path="/lien-he" element={<LienHe />} />
-        <Route path="/tim-kiem" element={<TimKiem />} />
         
-        {/* Trang 404 cho route con */}
-        <Route path="*" element={<NotFound />} />
+        {/* Core */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/gioi-thieu" element={<AboutPage />} />
+
+        {/* Phục dựng (Nested Route) */}
+        <Route path="/phuc-dung">
+          <Route index element={<ReenactmentPage />} />
+          <Route path=":countrySlug" element={<CountryPage />} />
+          <Route path=":countrySlug/:unitSlug" element={<UnitPage />} />
+          <Route path=":countrySlug/:unitSlug/:periodSlug" element={<PeriodPage />} />
+        </Route>
+
+        {/* Quân trang (Nested Route) */}
+        <Route path="/quan-trang">
+          <Route index element={<UniformsPage />} />
+          <Route path=":categorySlug" element={<CategoryPage />} />
+          <Route path=":categorySlug/:itemSlug" element={<ItemPage />} />
+        </Route>
+
+        {/* Tài liệu & Tin tức */}
+        <Route path="/tai-lieu" element={<PostListPage type="tai-lieu" />} />
+        <Route path="/tai-lieu/:slug" element={<PostDetailPage type="tai-lieu" />} />
+        
+        <Route path="/tin-tuc" element={<PostListPage type="tin-tuc" />} />
+        <Route path="/tin-tuc/:slug" element={<PostDetailPage type="tin-tuc" />} />
+
+        {/* Trang phụ */}
+        <Route path="/lien-he" element={<ContactPage />} />
+        <Route path="/tim-kiem" element={<SearchPage />} />
+        
+        {/* Trang 404 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      {/* 2. Các trang Full màn hình (Không có Header/Footer) */}
-      {/* Đây là trang người dùng sẽ thấy khi bấm vào link trong email */}
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* 2. Route Full màn hình (Không có Layout) */}
+      <Route path="/reset-password" element={<ResetPasswordForm />} />
     </Routes>
   );
 }
