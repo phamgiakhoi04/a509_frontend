@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { authApi } from "@/api/auth";
+import { authApi } from "@/api/authApi";
 import { motion } from "framer-motion"; // Thư viện animation
 import { Check, X, Lock, Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 

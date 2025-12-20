@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
-import { authApi, type RegisterRequest } from "@/api/auth";
+import { authApi, type RegisterRequest } from "@/api/authApi";
 import { Check, AlertTriangle } from "lucide-react";
 
 interface Props {

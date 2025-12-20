@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
-import { authApi } from "@/api/auth";
+import { authApi } from "@/api/authApi";
 import { Check, ArrowLeft, AlertTriangle } from "lucide-react";
 
 interface Props {

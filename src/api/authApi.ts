@@ -1,13 +1,19 @@
 import client from "./client";
 import type { AuthResponse, User } from "@/types/models";
 
-// Định nghĩa kiểu dữ liệu cho form đăng ký
 export type RegisterRequest = {
   username: string;
   password: string;
   email: string;
   fullName: string;
   phoneNumber: string;
+};
+
+export type UpdateProfileRequest = {
+  fullName?: string;
+  phoneNumber?: string;
+  email?: string;
+  avatarFile?: File | null;
 };
 
 export const authApi = {
@@ -23,23 +29,39 @@ export const authApi = {
     return res.data;
   },
 
-  // 3. Quên mật khẩu (Gửi email yêu cầu)
+  // 3. Quên mật khẩu
   forgotPassword: async (email: string) => {
-    // Backend dùng @RequestParam nên gửi qua params
     const res = await client.post("/auth/forgot-password", { email });
     return res.data;
   },
 
-  // 4. Đặt lại mật khẩu (Gửi token + pass mới)
+  // 4. Đặt lại mật khẩu
   resetPassword: async (token: string, newPassword: string) => {
-    const res = await client.post("/auth/reset-password", {
-      token,
-      newPassword,
-    });
+    const res = await client.post("/auth/reset-password", { token, newPassword });
     return res.data;
   },
 
-  // --- Các hàm tiện ích ---
+  // 5. Cập nhật Profile (Đã chuẩn hóa)
+  updateProfile: async (data: UpdateProfileRequest) => {
+    const formData = new FormData();
+    
+    // Chỉ đóng gói dữ liệu nếu có giá trị
+    if (data.fullName) formData.append("fullName", data.fullName);
+    if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
+    if (data.email) formData.append("email", data.email);
+    
+    // Đóng gói file ảnh
+    if (data.avatarFile) {
+      formData.append("avatarFile", data.avatarFile);
+    }
+
+    // LƯU Ý QUAN TRỌNG: Không set Content-Type thủ công!
+    // Axios sẽ tự động thêm boundary cho FormData.
+    const res = await client.post<User>("/users/profile", formData); 
+    return res.data;
+  },
+
+  // --- Tiện ích ---
   saveToken: (token: string, userInfo: User) => {
     localStorage.setItem("ACCESS_TOKEN", token);
     localStorage.setItem("USER_INFO", JSON.stringify(userInfo));
