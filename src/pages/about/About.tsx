@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import Card, { CardContent } from "@/components/ui/Card";
 import PlaceholderImage from "@/components/PlaceholderImage";
 
-export default function GioiThieu() {
+export default function About() {
   const [periods, setPeriods] = useState<PeriodArticle[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
 

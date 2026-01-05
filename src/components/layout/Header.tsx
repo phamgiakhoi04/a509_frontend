@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { authApi } from "@/api/authApi";
 import type { User } from "@/types/models";
 import AuthModal from "@/components/auth/AuthModal";
-import Profile from "@/components/auth/Profile"; // Import component Profile vừa làm
+import Profile from "@/components/auth/Profile";
 import { LogOut, User as UserIcon, ChevronDown, Settings } from "lucide-react";
 
 const navLinks = [
@@ -18,7 +18,7 @@ const navLinks = [
 export default function Header() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false); // State bật tắt Profile
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,8 +31,11 @@ export default function Header() {
     setCurrentUser(null);
   };
 
-  const navItemClass = "font-display font-bold text-sm text-white hover:text-brand-yellow transition-colors uppercase tracking-wide px-2 py-1";
-  const activeNavItemClass = "text-brand-yellow scale-105";
+  const navItemClass = 
+    "font-display font-bold text-sm text-white hover:text-brand-yellow transition-colors uppercase tracking-wide px-2 py-1 relative";
+
+  const activeNavItemClass = 
+    "text-brand-yellow border-b-2 border-brand-yellow pb-1"; // Dấu gạch chân vàng khi active
 
   return (
     <>
@@ -40,10 +43,14 @@ export default function Header() {
         <div className="container-page py-3">
           <div className="flex items-center justify-between">
             
-            {/* LOGO */}
+            {/* LOGO - Chỉ scale nhẹ + shadow khi hover */}
             <Link to="/" className="group relative z-50">
-              <div className="h-14 w-14 md:h-16 md:w-16 bg-brand-bg rounded-full border-4 border-brand-yellow flex items-center justify-center overflow-hidden shadow-lg group-hover:rotate-12 transition-transform hover:scale-110">
-                 <img src="/images/A509-vuong-org.png" className="w-10 h-10 md:w-12 md:h-12 object-cover" alt="Logo" />
+              <div className="h-14 w-14 md:h-16 md:w-16 bg-brand-bg rounded-full border-4 border-brand-yellow flex items-center justify-center overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                <img 
+                  src="/images/A509-vuong-org.png" 
+                  className="w-10 h-10 md:w-12 md:h-12 object-cover" 
+                  alt="Logo A509" 
+                />
               </div>
             </Link>
 
@@ -54,7 +61,9 @@ export default function Header() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={({ isActive }) => `${navItemClass} ${isActive ? activeNavItemClass : ""}`}
+                  className={({ isActive }) => 
+                    `${navItemClass} ${isActive ? activeNavItemClass : ""}`
+                  }
                 >
                   {item.label}
                 </NavLink>
@@ -62,12 +71,8 @@ export default function Header() {
 
               <div className="w-[1px] h-5 bg-white/30 mx-1"></div>
 
-              {/* KHU VỰC TÀI KHOẢN (CÓ DROPDOWN) */}
               {currentUser ? (
-                // Thêm class 'group' để xử lý hover
                 <div className="relative group">
-                  
-                  {/* Nút hiển thị Avatar + Tên */}
                   <button className="flex items-center gap-3 pl-1 py-1 rounded-full hover:bg-white/10 transition-colors">
                     <div className="h-8 w-8 rounded-full border border-brand-yellow bg-white overflow-hidden shadow-sm shrink-0">
                       {currentUser.avatarUrl ? (
@@ -89,17 +94,13 @@ export default function Header() {
                     <ChevronDown size={14} className="text-white/50 group-hover:text-brand-yellow transition-colors" />
                   </button>
 
-                  {/* === DROPDOWN MENU (Chỉ hiện khi hover vào group cha) === */}
                   <div className="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
                     <div className="bg-white rounded-xl shadow-2xl border-2 border-brand-yellow overflow-hidden animate-fade-in-up">
-                      
-                      {/* Header Dropdown */}
                       <div className="bg-brand-bg p-3 border-b border-gray-100">
                         <p className="text-xs font-bold text-gray-400 uppercase">Tài khoản</p>
                         <p className="text-sm font-black text-brand-redDark truncate">{currentUser.username}</p>
                       </div>
 
-                      {/* Các mục Menu */}
                       <div className="p-1">
                         <button 
                           onClick={() => setShowProfileModal(true)}
@@ -117,7 +118,6 @@ export default function Header() {
                       </div>
                     </div>
                   </div>
-
                 </div>
               ) : (
                 <button onClick={() => setShowAuthModal(true)} className={navItemClass}>
@@ -136,52 +136,52 @@ export default function Header() {
         {/* MOBILE MENU DROPDOWN */}
         {isMenuOpen && (
           <div className="md:hidden bg-brand-redDark border-t border-brand-yellow/30 p-4 space-y-2 animate-fade-in shadow-inner">
-             {navLinks.map(item => (
-                <Link 
-                  key={item.to} to={item.to} 
-                  className="block font-display font-bold text-white py-3 border-b border-white/5 hover:text-brand-yellow hover:pl-2 transition-all"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-             ))}
-             
-             {/* Mobile User Actions */}
-             <div className="pt-4 mt-2">
-                {currentUser ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-white px-2">
-                       <div className="h-8 w-8 rounded-full bg-brand-yellow text-brand-redDark flex items-center justify-center font-bold">
-                          {(currentUser.username[0] || "U").toUpperCase()}
-                       </div>
-                       <span className="font-bold">{currentUser.fullName || currentUser.username}</span>
+            {navLinks.map(item => (
+              <Link 
+                key={item.to} 
+                to={item.to} 
+                className="block font-display font-bold text-white py-3 border-b border-white/5 hover:text-brand-yellow hover:pl-2 transition-all"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            
+            <div className="pt-4 mt-2">
+              {currentUser ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-white px-2">
+                    <div className="h-8 w-8 rounded-full bg-brand-yellow text-brand-redDark flex items-center justify-center font-bold">
+                      {(currentUser.username[0] || "U").toUpperCase()}
                     </div>
-                    <button 
-                      onClick={() => { setShowProfileModal(true); setIsMenuOpen(false); }}
-                      className="w-full py-2 bg-white/10 text-white font-bold rounded hover:bg-white/20 text-sm flex items-center justify-center gap-2"
-                    >
-                      <Settings size={16} /> Hồ sơ cá nhân
-                    </button>
-                    <button 
-                      onClick={handleLogout} 
-                      className="w-full py-2 bg-brand-red text-white font-bold rounded hover:bg-red-600 text-sm flex items-center justify-center gap-2"
-                    >
-                      <LogOut size={16} /> Đăng xuất
-                    </button>
+                    <span className="font-bold">{currentUser.fullName || currentUser.username}</span>
                   </div>
-                ) : (
-                  <button onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }} className="w-full py-3 bg-brand-yellow text-brand-redDark font-black uppercase rounded shadow-md">
-                    Đăng nhập
+                  <button 
+                    onClick={() => { setShowProfileModal(true); setIsMenuOpen(false); }}
+                    className="w-full py-2 bg-white/10 text-white font-bold rounded hover:bg-white/20 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Settings size={16} /> Hồ sơ cá nhân
                   </button>
-                )}
-             </div>
+                  <button 
+                    onClick={handleLogout} 
+                    className="w-full py-2 bg-brand-red text-white font-bold rounded hover:bg-red-600 text-sm flex items-center justify-center gap-2"
+                  >
+                    <LogOut size={16} /> Đăng xuất
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }} 
+                  className="w-full py-3 bg-brand-yellow text-brand-redDark font-black uppercase rounded shadow-md"
+                >
+                  Đăng nhập
+                </button>
+              )}
+            </div>
           </div>
         )}
       </header>
 
-      {/* --- MODALS --- */}
-      
-      {/* 1. Login/Register Modal */}
       {showAuthModal && (
         <AuthModal 
           onClose={() => setShowAuthModal(false)} 
@@ -189,7 +189,6 @@ export default function Header() {
         />
       )}
 
-      {/* 2. Profile Drop Board Modal */}
       {showProfileModal && currentUser && (
         <Profile 
           user={currentUser} 
