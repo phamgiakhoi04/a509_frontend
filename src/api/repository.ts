@@ -1,9 +1,8 @@
-import { USE_LOCAL_DATA } from "@/config";
-import * as local from "@/mocks/data";
-import client from "@/api/client"; // Import client vừa tạo
+// src/api/repository.ts
+import client from "@/api/client"; // Giữ client để gọi API thật
 import type { Country, EquipmentItem } from "@/types/models";
 
-// Helper để map dữ liệu từ BE -> FE
+// Helper để map dữ liệu từ BE -> FE (giữ nguyên vì hữu ích)
 function mapUniformToEquipment(u: any): EquipmentItem {
   return {
     id: u.id,
@@ -23,9 +22,8 @@ function mapUniformToEquipment(u: any): EquipmentItem {
 }
 
 export const repo = {
-  // 1. Lấy danh sách Quốc gia
+  // 1. Lấy danh sách Quốc gia (dùng API thật)
   async getCountries(): Promise<Country[]> {
-    if (USE_LOCAL_DATA) return Promise.resolve(local.countries);
     try {
       const res = await client.get("/countries");
       // Map dữ liệu BE trả về sang format FE cần
@@ -41,9 +39,8 @@ export const repo = {
     }
   },
 
-  // 2. Lấy danh sách Quân trang (Uniforms)
+  // 2. Lấy danh sách Quân trang (Uniforms) - dùng API thật
   async getEquipmentItems(): Promise<EquipmentItem[]> {
-    if (USE_LOCAL_DATA) return Promise.resolve(local.equipmentItems);
     try {
       // Gọi API lấy tất cả (Page 0, Size 100 để lấy nhiều)
       const res = await client.get("/uniforms?page=0&size=100");
@@ -55,9 +52,25 @@ export const repo = {
     }
   },
 
-  // --- Các hàm chưa có API thật thì giữ nguyên Mock hoặc trả về rỗng ---
-  async getUnits() { return Promise.resolve(local.units); },
-  async getPeriodArticles() { return Promise.resolve(local.periodArticles); },
-  async getEquipmentCategories() { return Promise.resolve(local.equipmentCategories); },
-  async getPosts() { return Promise.resolve(local.posts); },
+  // Các hàm khác: Trả về rỗng hoặc throw error để buộc build UI mới
+  // (bạn sẽ viết lại sau khi có API thật)
+  async getUnits() {
+    console.warn("getUnits chưa có API thật");
+    return Promise.resolve([]); // Trả mảng rỗng để UI không crash
+  },
+
+  async getPeriodArticles() {
+    console.warn("getPeriodArticles chưa có API thật");
+    return Promise.resolve([]);
+  },
+
+  async getEquipmentCategories() {
+    console.warn("getEquipmentCategories chưa có API thật");
+    return Promise.resolve([]);
+  },
+
+  async getPosts() {
+    console.warn("getPosts chưa có API thật");
+    return Promise.resolve([]);
+  },
 };

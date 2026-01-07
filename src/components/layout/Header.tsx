@@ -1,10 +1,11 @@
+// src/components/layout/Header.tsx
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { authApi } from "@/api/authApi";
 import type { User } from "@/types/models";
 import AuthModal from "@/components/auth/AuthModal";
 import Profile from "@/components/auth/Profile";
-import { LogOut, User as UserIcon, ChevronDown, Settings } from "lucide-react";
+import { LogOut, User as UserIcon, ChevronDown, Settings, Shield } from "lucide-react";
 
 const navLinks = [
   { to: "/gioi-thieu", label: "GIỚI THIỆU" },
@@ -15,53 +16,63 @@ const navLinks = [
   { to: "/lien-he", label: "LIÊN HỆ" },
 ];
 
+const getAvatarWithCache = (url: string | undefined | null) => {
+  if (!url) return undefined;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${Date.now()}`;
+};
+
 export default function Header() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const user = authApi.getCurrentUser();
-    if (user) setCurrentUser(user);
+    if (user) {
+      setCurrentUser({
+        ...user,
+        avatarUrl: getAvatarWithCache(user.avatarUrl),
+      });
+      setIsAdmin(user.roles?.some((r: any) => r.name === "ADMIN"));
+    }
   }, []);
 
   const handleLogout = () => {
     authApi.logout();
     setCurrentUser(null);
+    setIsAdmin(false);
   };
 
-  const navItemClass = 
+  const navItemClass =
     "font-display font-bold text-sm text-white hover:text-brand-yellow transition-colors uppercase tracking-wide px-2 py-1 relative";
 
-  const activeNavItemClass = 
-    "text-brand-yellow border-b-2 border-brand-yellow pb-1"; // Dấu gạch chân vàng khi active
+  const activeNavItemClass =
+    "text-brand-yellow border-b-2 border-brand-yellow pb-1";
 
   return (
     <>
       <header className="sticky top-0 z-40 bg-brand-redDark shadow-pop border-b-4 border-brand-yellow">
         <div className="container-page py-3">
           <div className="flex items-center justify-between">
-            
-            {/* LOGO - Chỉ scale nhẹ + shadow khi hover */}
             <Link to="/" className="group relative z-50">
               <div className="h-14 w-14 md:h-16 md:w-16 bg-brand-bg rounded-full border-4 border-brand-yellow flex items-center justify-center overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-                <img 
-                  src="/images/A509-vuong-org.png" 
-                  className="w-10 h-10 md:w-12 md:h-12 object-cover" 
-                  alt="Logo A509" 
+                <img
+                  src="/images/A509-vuong-org.png"
+                  className="w-10 h-10 md:w-12 md:h-12 object-cover"
+                  alt="Logo A509"
                 />
               </div>
             </Link>
 
-            {/* DESKTOP MENU */}
             <nav className="hidden md:flex items-center gap-4 bg-brand-red/30 px-8 py-2.5 rounded-full border border-white/10 backdrop-blur-sm relative z-40">
-              
               {navLinks.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `${navItemClass} ${isActive ? activeNavItemClass : ""}`
                   }
                 >
@@ -76,7 +87,14 @@ export default function Header() {
                   <button className="flex items-center gap-3 pl-1 py-1 rounded-full hover:bg-white/10 transition-colors">
                     <div className="h-8 w-8 rounded-full border border-brand-yellow bg-white overflow-hidden shadow-sm shrink-0">
                       {currentUser.avatarUrl ? (
-                        <img src={currentUser.avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+                        <img
+                          src={currentUser.avatarUrl}
+                          className="w-full h-full object-cover"
+                          alt="Avatar"
+                          onError={(e) => {
+                            e.currentTarget.src = "/default-avatar.png";
+                          }}
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-brand-redDark bg-brand-bg">
                           <UserIcon size={16} />
@@ -85,31 +103,48 @@ export default function Header() {
                     </div>
 
                     <div className="flex flex-col items-start leading-none">
-                      <span className="text-[10px] text-brand-yellow font-bold opacity-80 mb-0.5">XIN CHÀO</span>
+                      <span className="text-[10px] text-brand-yellow font-bold opacity-80 mb-0.5">
+                        XIN CHÀO
+                      </span>
                       <span className="font-display font-bold text-white text-sm truncate max-w-[100px] text-left">
                         {currentUser.fullName || currentUser.username}
                       </span>
                     </div>
-                    
-                    <ChevronDown size={14} className="text-white/50 group-hover:text-brand-yellow transition-colors" />
+
+                    <ChevronDown
+                      size={14}
+                      className="text-white/50 group-hover:text-brand-yellow transition-colors"
+                    />
                   </button>
 
                   <div className="absolute right-0 top-full pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
                     <div className="bg-white rounded-xl shadow-2xl border-2 border-brand-yellow overflow-hidden animate-fade-in-up">
                       <div className="bg-brand-bg p-3 border-b border-gray-100">
-                        <p className="text-xs font-bold text-gray-400 uppercase">Tài khoản</p>
-                        <p className="text-sm font-black text-brand-redDark truncate">{currentUser.username}</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase">
+                          Tài khoản
+                        </p>
+                        <p className="text-sm font-black text-brand-redDark truncate">
+                          {currentUser.username}
+                        </p>
                       </div>
 
                       <div className="p-1">
-                        <button 
+                        {isAdmin && (
+                          <Link
+                            to="/admin"
+                            className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-brand-red/10 hover:text-brand-redDark rounded-lg transition-colors"
+                          >
+                            <Shield size={18} /> Quản trị
+                          </Link>
+                        )}
+                        <button
                           onClick={() => setShowProfileModal(true)}
                           className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-brand-red/10 hover:text-brand-redDark rounded-lg transition-colors"
                         >
                           <Settings size={18} /> Hồ sơ cá nhân
                         </button>
-                        
-                        <button 
+
+                        <button
                           onClick={handleLogout}
                           className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         >
@@ -120,33 +155,37 @@ export default function Header() {
                   </div>
                 </div>
               ) : (
-                <button onClick={() => setShowAuthModal(true)} className={navItemClass}>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className={navItemClass}
+                >
                   TÀI KHOẢN
                 </button>
               )}
             </nav>
 
-            {/* MOBILE MENU TOGGLE */}
-            <button className="md:hidden text-brand-yellow text-3xl leading-none" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <button
+              className="md:hidden text-brand-yellow text-3xl leading-none"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
               ☰
             </button>
           </div>
         </div>
 
-        {/* MOBILE MENU DROPDOWN */}
         {isMenuOpen && (
           <div className="md:hidden bg-brand-redDark border-t border-brand-yellow/30 p-4 space-y-2 animate-fade-in shadow-inner">
-            {navLinks.map(item => (
-              <Link 
-                key={item.to} 
-                to={item.to} 
+            {navLinks.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
                 className="block font-display font-bold text-white py-3 border-b border-white/5 hover:text-brand-yellow hover:pl-2 transition-all"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            
+
             <div className="pt-4 mt-2">
               {currentUser ? (
                 <div className="space-y-3">
@@ -154,24 +193,41 @@ export default function Header() {
                     <div className="h-8 w-8 rounded-full bg-brand-yellow text-brand-redDark flex items-center justify-center font-bold">
                       {(currentUser.username[0] || "U").toUpperCase()}
                     </div>
-                    <span className="font-bold">{currentUser.fullName || currentUser.username}</span>
+                    <span className="font-bold">
+                      {currentUser.fullName || currentUser.username}
+                    </span>
                   </div>
-                  <button 
-                    onClick={() => { setShowProfileModal(true); setIsMenuOpen(false); }}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="w-full py-2 bg-white/10 text-white font-bold rounded hover:bg-white/20 text-sm flex items-center justify-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Shield size={16} /> Quản trị
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(true);
+                      setIsMenuOpen(false);
+                    }}
                     className="w-full py-2 bg-white/10 text-white font-bold rounded hover:bg-white/20 text-sm flex items-center justify-center gap-2"
                   >
                     <Settings size={16} /> Hồ sơ cá nhân
                   </button>
-                  <button 
-                    onClick={handleLogout} 
+                  <button
+                    onClick={handleLogout}
                     className="w-full py-2 bg-brand-red text-white font-bold rounded hover:bg-red-600 text-sm flex items-center justify-center gap-2"
                   >
                     <LogOut size={16} /> Đăng xuất
                   </button>
                 </div>
               ) : (
-                <button 
-                  onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }} 
+                <button
+                  onClick={() => {
+                    setShowAuthModal(true);
+                    setIsMenuOpen(false);
+                  }}
                   className="w-full py-3 bg-brand-yellow text-brand-redDark font-black uppercase rounded shadow-md"
                 >
                   Đăng nhập
@@ -183,15 +239,21 @@ export default function Header() {
       </header>
 
       {showAuthModal && (
-        <AuthModal 
-          onClose={() => setShowAuthModal(false)} 
-          onLoginSuccess={(user) => setCurrentUser(user)}
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onLoginSuccess={(user) => {
+            setCurrentUser({
+              ...user,
+              avatarUrl: getAvatarWithCache(user.avatarUrl),
+            });
+            setIsAdmin(user.roles?.some((r: any) => r.name === "ADMIN"));
+          }}
         />
       )}
 
       {showProfileModal && currentUser && (
-        <Profile 
-          user={currentUser} 
+        <Profile
+          user={currentUser}
           onClose={() => setShowProfileModal(false)}
           onUpdateSuccess={(updated) => setCurrentUser(updated)}
         />

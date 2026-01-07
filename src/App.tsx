@@ -1,74 +1,56 @@
+// src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-
-// --- Auth Components ---
+import HomePage from "@/pages/home/HomePage";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
-// --- Core Pages ---
-import HomePage from "@/pages/home/HomePage";
-import AboutPage from "@/pages/about/AboutPage"; 
-
-// --- Reenactment (Phục dựng) ---
-import ReenactmentPage from "@/pages/reenactment/ReenactmentPage";
-import CountryPage from "@/pages/reenactment/CountryPage";
-import UnitPage from "@/pages/reenactment/UnitPage";
-import PeriodPage from "@/pages/reenactment/PeriodPage";
-
-// --- Uniforms (Quân trang) ---
-import UniformsPage from "@/pages/uniforms/UniformsPage";
-import CategoryPage from "@/pages/uniforms/CategoryPage";
-import ItemPage from "@/pages/uniforms/ItemPage";
-
-// --- Posts (Tin tức / Tài liệu) ---
-import PostListPage from "@/pages/posts/PostListPage";
-import PostDetailPage from "@/pages/posts/PostDetailPage";
-
-// --- Utility Pages ---
-import ContactPage from "@/pages/Contact";
-import SearchPage from "@/pages/Search";
-import NotFoundPage from "@/pages/NotFound";
+import AdminLayout from "@/components/admin/AdminLayout";
+import ProtectedRoute from "@/components/admin/ProtectedRoute";
+import UniformManager from "@/pages/admin/UniformManager";
 
 export default function App() {
   return (
     <Routes>
-      {/* 1. Layout chính (Có Header & Footer) */}
       <Route element={<Layout />}>
-        
-        {/* Core */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/gioi-thieu" element={<AboutPage />} />
+        <Route path="/gioi-thieu" element={<div className="min-h-screen bg-white pt-20 text-center">Giới Thiệu</div>} />
+        <Route path="/about" element={<div className="min-h-screen bg-white pt-20 text-center">About</div>} />
 
-        {/* Phục dựng (Nested Route) */}
         <Route path="/phuc-dung">
-          <Route index element={<ReenactmentPage />} />
-          <Route path=":countrySlug" element={<CountryPage />} />
-          <Route path=":countrySlug/:unitSlug" element={<UnitPage />} />
-          <Route path=":countrySlug/:unitSlug/:periodSlug" element={<PeriodPage />} />
+          <Route index element={<div className="min-h-screen bg-white pt-20 text-center">Phục Dựng</div>} />
+          <Route path=":countrySlug" element={<div className="min-h-screen bg-white pt-20 text-center">Theo Quốc gia</div>} />
+          <Route path=":countrySlug/:unitSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Đơn vị</div>} />
+          <Route path=":countrySlug/:unitSlug/:periodSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Giai đoạn</div>} />
         </Route>
 
-        {/* Quân trang (Nested Route) */}
         <Route path="/quan-trang">
-          <Route index element={<UniformsPage />} />
-          <Route path=":categorySlug" element={<CategoryPage />} />
-          <Route path=":categorySlug/:itemSlug" element={<ItemPage />} />
+          <Route index element={<div className="min-h-screen bg-white pt-20 text-center">Quân Trang</div>} />
+          <Route path=":categorySlug" element={<div className="min-h-screen bg-white pt-20 text-center">Danh mục</div>} />
+          <Route path=":categorySlug/:itemSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết</div>} />
         </Route>
 
-        {/* Tài liệu & Tin tức */}
-        <Route path="/tai-lieu" element={<PostListPage type="tai-lieu" />} />
-        <Route path="/tai-lieu/:slug" element={<PostDetailPage type="tai-lieu" />} />
-        
-        <Route path="/tin-tuc" element={<PostListPage type="tin-tuc" />} />
-        <Route path="/tin-tuc/:slug" element={<PostDetailPage type="tin-tuc" />} />
+        <Route path="/tin-tuc" element={<div className="min-h-screen bg-white pt-20 text-center">Tin Tức</div>} />
+        <Route path="/tin-tuc/:slug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Tin</div>} />
 
-        {/* Trang phụ */}
-        <Route path="/lien-he" element={<ContactPage />} />
-        <Route path="/tim-kiem" element={<SearchPage />} />
-        
-        {/* Trang 404 */}
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/tai-lieu" element={<div className="min-h-screen bg-white pt-20 text-center">Tài Liệu</div>} />
+        <Route path="/tai-lieu/:slug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Tài Liệu</div>} />
+
+        <Route path="/lien-he" element={<div className="min-h-screen bg-white pt-20 text-center">Liên Hệ</div>} />
+        <Route path="/tim-kiem" element={<div className="min-h-screen bg-white pt-20 text-center">Tìm kiếm</div>} />
+
+        <Route path="*" element={<div className="min-h-screen bg-white flex items-center justify-center text-3xl font-bold text-gray-400">404 - Không tìm thấy</div>} />
       </Route>
 
-      {/* 2. Route Full màn hình (Không có Layout) */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<div className="p-4 text-2xl font-bold text-slate-700">Chào mừng đến trang quản trị</div>} />
+          <Route path="dashboard" element={<div className="p-4 text-slate-600">Thống kê (đang phát triển)</div>} />
+          <Route path="uniforms" element={<UniformManager />} />
+          <Route path="posts" element={<div className="p-4 text-slate-600">Quản lý Tin tức & Tài liệu (đang phát triển)</div>} />
+          <Route path="users" element={<div className="p-4 text-slate-600">Quản lý Người dùng (đang phát triển)</div>} />
+        </Route>
+      </Route>
+
       <Route path="/reset-password" element={<ResetPasswordForm />} />
     </Routes>
   );

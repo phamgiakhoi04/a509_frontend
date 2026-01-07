@@ -2,6 +2,7 @@ export type NavItem = { to: string; label: string };
 
 // --- 1. USER (Khớp với BE) ---
 export type User = {
+  roles: any;
   id: number;
   username: string;
   email: string;
