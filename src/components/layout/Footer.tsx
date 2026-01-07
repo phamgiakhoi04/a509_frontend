@@ -4,44 +4,52 @@ import Card, { CardContent } from "@/components/ui/Card";
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
-      <div className="container-page py-10 grid gap-4 md:grid-cols-3">
+      <div className="container-page py-10">
         <Card>
           <CardContent>
-            <div className="font-semibold">Lame stuff</div>
-            <p className="mt-2 text-sm text-slate-700">
-              Placeholder: thêm mô tả dự án, quy định an toàn, quy trình tham gia, v.v.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div className="font-semibold">Liên hệ</div>
-            <ul className="mt-2 text-sm text-slate-700 space-y-1">
-              <li>Email: xxxxxxxxxx</li>
-              <li>Facebook: xxxxxxxxxx</li>
-              <li>Twitter: xxxxxxxxxx</li>
-              <li>Youtube: xxxxxxxxxx</li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div className="font-semibold">Điều hướng</div>
-            <ul className="mt-2 text-sm text-slate-700 space-y-1">
-              <li><Link className="hover:underline" to="/gioi-thieu">Giới thiệu</Link></li>
-              <li><Link className="hover:underline" to="/phuc-dung">Phục dựng</Link></li>
-              <li><Link className="hover:underline" to="/quan-trang">Quân trang</Link></li>
-              <li><Link className="hover:underline" to="/tai-lieu">Tài liệu</Link></li>
-              <li><Link className="hover:underline" to="/tin-tuc">Tin tức</Link></li>
+            <div className="font-semibold text-lg">Liên hệ</div>
+            <ul className="mt-4 text-sm text-slate-700 space-y-2">
+              <li>Email: phamgiakhoi04@gmail.com</li>
+              <li>
+                Facebook:{" "}
+                <a
+                  href="https://www.facebook.com/A509VN"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-redDark hover:text-brand-yellow hover:underline transition-colors"
+                >
+                  facebook.com/A509VN
+                </a>
+              </li>
+              <li>
+                Twitter:{" "}
+                <a
+                  href="https://x.com/A509VN?s=20"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-redDark hover:text-brand-yellow hover:underline transition-colors"
+                >
+                  x.com/A509VN
+                </a>
+              </li>
+              <li>
+                YouTube:{" "}
+                <a
+                  href="https://www.youtube.com/@A509VN"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-redDark hover:text-brand-yellow hover:underline transition-colors"
+                >
+                  youtube.com/@A509VN
+                </a>
+              </li>
             </ul>
           </CardContent>
         </Card>
       </div>
 
-      <div className="container-page pb-10 text-xs text-slate-500">
-        © {new Date().getFullYear()} A509 (placeholder)
+      <div className="container-page pb-10 text-xs text-slate-500 text-center">
+        © {new Date().getFullYear()} A509 - Dự án tái hiện lịch sử Việt Nam
       </div>
     </footer>
   );

@@ -6,7 +6,7 @@ import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 // --- Core Pages ---
 import HomePage from "@/pages/home/HomePage";
-import AboutPage from "@/pages/about/About"; 
+import AboutPage from "@/pages/about/AboutPage"; 
 
 // --- Reenactment (Phục dựng) ---
 import ReenactmentPage from "@/pages/reenactment/ReenactmentPage";
