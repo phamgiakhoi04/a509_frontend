@@ -58,11 +58,11 @@ export default function Header() {
         <div className="container-page py-3">
           <div className="flex items-center justify-between">
             <Link to="/" className="group relative z-50">
-              <div className="h-14 w-14 md:h-16 md:w-16 bg-brand-bg rounded-full border-4 border-brand-yellow flex items-center justify-center overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+              <div className="h-12 w-12 md:h-14 md:w-14 bg-brand-bg rounded-full border-4 border-brand-yellow overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
                 <img
                   src="/images/A509-vuong-org.png"
-                  className="w-10 h-10 md:w-12 md:h-12 object-cover"
                   alt="Logo A509"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             </Link>

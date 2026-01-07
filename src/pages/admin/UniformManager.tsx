@@ -87,35 +87,39 @@ export default function UniformManager() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-8 font-body">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-black text-slate-800 uppercase">Quản lý Quân trang</h1>
+        <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
+          Quản lý Quân trang
+        </h1>
         <Button
           onClick={() => setShowForm(true)}
-          className="bg-red-800 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-red-700"
+          className="bg-brand-red text-white px-6 py-3 rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all flex items-center gap-2"
         >
-          <Plus size={20} /> Thêm mới
+          <Plus size={22} /> Thêm mới
         </Button>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl p-10 relative max-h-[90vh] overflow-y-auto shadow-2xl border-4 border-brand-yellow/30">
             <button
               onClick={() => setShowForm(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-red-600"
+              className="absolute top-6 right-6 text-brand-text hover:text-brand-red transition-colors"
             >
-              <X size={28} />
+              <X size={32} />
             </button>
 
-            <h2 className="text-2xl font-bold mb-8 text-red-800 border-b pb-3">THÊM QUÂN TRANG MỚI</h2>
+            <h2 className="text-3xl font-display font-black text-brand-redDark mb-10 border-b-4 border-brand-yellow/40 pb-4">
+              THÊM QUÂN TRANG MỚI
+            </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Tên hiện vật</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Tên hiện vật</label>
                   <input
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
                     placeholder="Ví dụ: Mũ cối 1954..."
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -124,9 +128,9 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Mô tả</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Mô tả</label>
                   <textarea
-                    className="w-full border border-gray-300 rounded-lg p-3 h-32 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none resize-none"
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-40 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none resize-none transition-all"
                     placeholder="Mô tả chi tiết..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -134,8 +138,8 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Hình ảnh</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-red-500 transition-colors relative group cursor-pointer bg-gray-50">
+                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh</label>
+                  <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
                     <input
                       type="file"
                       accept="image/*"
@@ -144,35 +148,37 @@ export default function UniformManager() {
                     />
                     {previewUrl ? (
                       <div className="relative inline-block">
-                        <img src={previewUrl} alt="preview" className="max-h-48 object-contain rounded shadow" />
-                        <div className="absolute inset-0 bg-black/40 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-white font-semibold">Thay đổi</span>
+                        <img src={previewUrl} alt="preview" className="max-h-56 object-contain rounded-2xl shadow-pop" />
+                        <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-white font-bold text-xl">Thay đổi</span>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <UploadCloud size={48} className="mx-auto mb-3 text-gray-400 group-hover:text-red-500 transition-colors" />
-                        <p className="text-sm font-medium text-gray-500 group-hover:text-red-600">Click hoặc kéo thả ảnh (tối đa 5MB)</p>
+                        <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
+                        <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
+                          Click hoặc kéo thả ảnh (tối đa 5MB)
+                        </p>
                       </>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 pt-6 border-t">
+              <div className="flex justify-end gap-6 pt-8 border-t border-brand-red/20">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
+                  className="px-8 py-3 rounded-xl font-bold text-brand-text hover:bg-brand-bg transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-2.5 bg-red-800 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-60 flex items-center gap-2"
+                  className="px-10 py-3 bg-brand-red text-white rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover disabled:opacity-50 flex items-center gap-3 transition-all"
                 >
-                  {loading && <Loader2 className="animate-spin" size={18} />}
+                  {loading && <Loader2 className="animate-spin" size={22} />}
                   {loading ? "Đang lưu..." : "Lưu"}
                 </button>
               </div>
@@ -181,40 +187,43 @@ export default function UniformManager() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-3xl shadow-pop overflow-hidden border-2 border-brand-red/10">
         <table className="w-full text-left">
-          <thead className="bg-gray-50 text-gray-600 text-xs font-semibold uppercase">
+          <thead className="bg-brand-bg text-brand-redDark text-sm font-bold uppercase tracking-wider">
             <tr>
-              <th className="p-4">ID</th>
-              <th className="p-4">Ảnh</th>
-              <th className="p-4">Tên</th>
-              <th className="p-4">Ngày tạo</th>
-              <th className="p-4 text-right">Thao tác</th>
+              <th className="p-5">ID</th>
+              <th className="p-5">Ảnh</th>
+              <th className="p-5">Tên</th>
+              <th className="p-5">Ngày tạo</th>
+              <th className="p-5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-brand-red/10">
             {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="p-4 text-gray-500 font-mono">#{item.id}</td>
-                <td className="p-4">
-                  <div className="w-16 h-16 rounded overflow-hidden bg-gray-100 border border-gray-200">
+              <tr key={item.id} className="hover:bg-brand-bg/60 transition-colors">
+                <td className="p-5 text-brand-text font-mono">#{item.id}</td>
+                <td className="p-5">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-brand-bg border-2 border-brand-yellow/30 shadow-pop">
                     {item.images?.[0]?.url ? (
                       <img src={item.images[0].url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No img</div>
+                      <div className="w-full h-full flex items-center justify-center text-xs text-brand-text/50">No img</div>
                     )}
                   </div>
                 </td>
-                <td className="p-4 font-medium text-gray-800">{item.name}</td>
-                <td className="p-4 text-sm text-gray-500">
+                <td className="p-5 font-bold text-brand-text text-lg">{item.name}</td>
+                <td className="p-5 text-brand-text/70">
                   {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "-"}
                 </td>
-                <td className="p-4 text-right space-x-2">
-                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
-                    <Edit size={18} />
+                <td className="p-5 text-right space-x-3">
+                  <button className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors">
+                    <Edit size={22} />
                   </button>
-                  <button onClick={() => handleDelete(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded">
-                    <Trash2 size={18} />
+                  <button 
+                    onClick={() => handleDelete(item.id)} 
+                    className="p-3 text-brand-red hover:bg-brand-red/10 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={22} />
                   </button>
                 </td>
               </tr>
@@ -222,7 +231,7 @@ export default function UniformManager() {
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-12 text-center text-gray-400 italic">
+                <td colSpan={5} className="p-16 text-center text-brand-text/50 italic text-xl">
                   Chưa có quân trang nào
                 </td>
               </tr>
