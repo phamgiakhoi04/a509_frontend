@@ -23,7 +23,7 @@ export default function AdminSidebar() {
       >
         <div className="h-12 w-12 rounded-full bg-brand-bg border-4 border-brand-yellow overflow-hidden flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
           <img
-            src="/images/A509-vuong-org.png"
+            src="/images/A509 Logo.png"
             alt="A509 Logo"
             className="w-10 h-10 object-cover"
           />

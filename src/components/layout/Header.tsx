@@ -55,16 +55,11 @@ export default function Header() {
 
     loadUser();
 
-    // Optional: nếu authApi có event listener cho login/logout thì subscribe ở đây
-    // Ví dụ: authApi.onAuthChange(loadUser); (nếu có)
-
     return () => {
-      // cleanup nếu dùng listener
     };
   }, []);
 
   useEffect(() => {
-    // Đảm bảo khi currentUser thay đổi thì isAdmin cũng cập nhật lại
     setIsAdmin(checkIsAdmin(currentUser));
   }, [currentUser]);
 
@@ -88,7 +83,7 @@ export default function Header() {
             <Link to="/" className="group relative z-50">
               <div className="h-12 w-12 md:h-14 md:w-14 bg-brand-bg rounded-full border-4 border-brand-yellow overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
                 <img
-                  src="/images/A509-vuong-org.png"
+                  src="/images/A509 Logo.png"
                   alt="Logo A509"
                   className="w-full h-full object-cover object-center"
                 />
