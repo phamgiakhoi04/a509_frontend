@@ -1,4 +1,3 @@
-// src/components/layout/Header.tsx
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { authApi } from "@/api/authApi";
@@ -27,18 +26,47 @@ export default function Header() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  const checkIsAdmin = (user: User | null) => {
+    if (!user) return false;
+    const hasAdminInRoles = user.roles?.some((r: any) => 
+      r.name === "ADMIN" || r.name === "ROLE_ADMIN"
+    );
+    const hasAdminRoleName = user.roleName === "ADMIN" || user.roleName === "ROLE_ADMIN";
+    return hasAdminInRoles || hasAdminRoleName;
+  };
+
+  const [isAdmin, setIsAdmin] = useState(checkIsAdmin(null));
 
   useEffect(() => {
-    const user = authApi.getCurrentUser();
-    if (user) {
-      setCurrentUser({
-        ...user,
-        avatarUrl: getAvatarWithCache(user.avatarUrl),
-      });
-      setIsAdmin(user.roles?.some((r: any) => r.name === "ADMIN"));
-    }
+    const loadUser = () => {
+      const user = authApi.getCurrentUser();
+      if (user) {
+        setCurrentUser({
+          ...user,
+          avatarUrl: getAvatarWithCache(user.avatarUrl),
+        });
+        setIsAdmin(checkIsAdmin(user));
+      } else {
+        setCurrentUser(null);
+        setIsAdmin(false);
+      }
+    };
+
+    loadUser();
+
+    // Optional: nếu authApi có event listener cho login/logout thì subscribe ở đây
+    // Ví dụ: authApi.onAuthChange(loadUser); (nếu có)
+
+    return () => {
+      // cleanup nếu dùng listener
+    };
   }, []);
+
+  useEffect(() => {
+    // Đảm bảo khi currentUser thay đổi thì isAdmin cũng cập nhật lại
+    setIsAdmin(checkIsAdmin(currentUser));
+  }, [currentUser]);
 
   const handleLogout = () => {
     authApi.logout();
@@ -197,6 +225,7 @@ export default function Header() {
                       {currentUser.fullName || currentUser.username}
                     </span>
                   </div>
+
                   {isAdmin && (
                     <Link
                       to="/admin"
@@ -206,6 +235,7 @@ export default function Header() {
                       <Shield size={16} /> Quản trị
                     </Link>
                   )}
+
                   <button
                     onClick={() => {
                       setShowProfileModal(true);
@@ -215,6 +245,7 @@ export default function Header() {
                   >
                     <Settings size={16} /> Hồ sơ cá nhân
                   </button>
+
                   <button
                     onClick={handleLogout}
                     className="w-full py-2 bg-brand-red text-white font-bold rounded hover:bg-red-600 text-sm flex items-center justify-center gap-2"
@@ -246,7 +277,7 @@ export default function Header() {
               ...user,
               avatarUrl: getAvatarWithCache(user.avatarUrl),
             });
-            setIsAdmin(user.roles?.some((r: any) => r.name === "ADMIN"));
+            setIsAdmin(checkIsAdmin(user));
           }}
         />
       )}
@@ -255,7 +286,10 @@ export default function Header() {
         <Profile
           user={currentUser}
           onClose={() => setShowProfileModal(false)}
-          onUpdateSuccess={(updated) => setCurrentUser(updated)}
+          onUpdateSuccess={(updated) => {
+            setCurrentUser(updated);
+            setIsAdmin(checkIsAdmin(updated));
+          }}
         />
       )}
     </>

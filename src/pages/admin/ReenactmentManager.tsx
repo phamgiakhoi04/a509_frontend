@@ -1,45 +1,48 @@
 import { useState, useEffect } from "react";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
-import { Plus, Trash2, Edit, UploadCloud, X, Loader2 } from "lucide-react";
-import type { EquipmentItem } from "@/types/models";
+import { Plus, Trash2, Edit, UploadCloud, X, Loader2, Globe } from "lucide-react";
 
-export default function UniformManager() {
-  const [items, setItems] = useState<EquipmentItem[]>([]);
+export default function ReenactmentManager() {
+  const [countries, setCountries] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
+    countryName: "",
+    continent: "",
     description: "",
-    history: "",
-    material: "",
-    countryId: 1,
+    flagImageUrl: "", // Nếu không upload file, dùng text input
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedFlag, setSelectedFlag] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
-    fetchItems();
+    fetchCountries();
   }, []);
 
-  const fetchItems = async () => {
+  const fetchCountries = async () => {
     try {
-      const data = await adminApi.getAllUniforms();
-      setItems((data.content || data) as EquipmentItem[]);
+      const data = await adminApi.getAllCountries();
+      // Map thêm slug cho route FE nếu cần (:countrySlug)
+      const mapped = data.map((c: any) => ({
+        ...c,
+        slug: c.countryName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+      }));
+      setCountries(mapped);
     } catch (error) {
-      console.error("Lỗi tải danh sách:", error);
+      console.error("Lỗi tải danh sách quốc gia:", error);
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFlagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
       if (file.size > 5 * 1024 * 1024) {
-        alert("Ảnh tối đa 5MB");
+        alert("Ảnh cờ tối đa 5MB");
         return;
       }
-      setSelectedImage(file);
+      setSelectedFlag(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
@@ -49,39 +52,43 @@ export default function UniformManager() {
     setLoading(true);
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("history", formData.history);
-      formDataToSend.append("material", formData.material);
-      formDataToSend.append("countryId", formData.countryId.toString());
+      let flagUrl = formData.flagImageUrl;
 
-      if (selectedImage) {
-        formDataToSend.append("imageFiles", selectedImage);
+      if (selectedFlag) {
+        const uploadResult = await adminApi.uploadImage(selectedFlag);
+        flagUrl = uploadResult?.url || uploadResult?.imageUrl;
+        if (!flagUrl) throw new Error("Không upload được cờ quốc gia");
       }
 
-      await adminApi.createUniform(formDataToSend);
+      const payload = {
+        countryName: formData.countryName,
+        continent: formData.continent,
+        description: formData.description,
+        flagImageUrl: flagUrl,
+      };
+
+      await adminApi.createCountry(payload);
 
       setShowForm(false);
-      setFormData({ name: "", description: "", history: "", material: "", countryId: 1 });
-      setSelectedImage(null);
+      setFormData({ countryName: "", continent: "", description: "", flagImageUrl: "" });
+      setSelectedFlag(null);
       setPreviewUrl("");
-      fetchItems();
+      fetchCountries();
     } catch (error: any) {
-      alert(error.response?.data?.message || "Lỗi khi lưu quân trang");
+      alert(error.response?.data || "Lỗi khi lưu quốc gia");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Xác nhận xóa?")) return;
+    if (!window.confirm("Xác nhận xóa quốc gia này? (Không thể xóa nếu có quân trang liên quan)")) return;
 
     try {
-      await adminApi.deleteUniform(id);
-      fetchItems();
+      await adminApi.deleteCountry(id);
+      fetchCountries();
     } catch (err: any) {
-      alert(err.response?.data || "Không thể xóa");
+      alert(err.response?.data || "Không thể xóa quốc gia (có thể có dữ liệu liên quan)");
     }
   };
 
@@ -89,13 +96,13 @@ export default function UniformManager() {
     <div className="space-y-8 p-8 font-body">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
-          Quản lý Quân trang
+          Quản lý Phục Dựng (Quốc gia)
         </h1>
         <Button
           onClick={() => setShowForm(true)}
           className="bg-brand-red text-white px-6 py-3 rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all flex items-center gap-2"
         >
-          <Plus size={22} /> Thêm mới
+          <Plus size={22} /> Thêm Quốc gia Mới
         </Button>
       </div>
 
@@ -110,74 +117,61 @@ export default function UniformManager() {
             </button>
 
             <h2 className="text-3xl font-display font-black text-brand-redDark mb-10 border-b-4 border-brand-yellow/40 pb-4">
-              THÊM QUÂN TRANG MỚI
+              THÊM QUỐC GIA MỚI
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Tên hiện vật</label>
+                <div>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Tên Quốc gia</label>
                   <input
                     className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.countryName}
+                    onChange={(e) => setFormData({ ...formData, countryName: e.target.value })}
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Châu lục</label>
+                  <input
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
+                    value={formData.continent}
+                    onChange={(e) => setFormData({ ...formData, continent: e.target.value })}
                   />
                 </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-lg font-bold text-brand-text mb-3">Mô tả</label>
                   <textarea
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none resize-none transition-all"
-                    placeholder="Mô tả chi tiết..."
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-40 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none resize-none transition-all"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                <div className="md:col-span-1">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Lịch sử sử dụng</label>
-                  <textarea
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-none transition-all"
-                    placeholder="Lịch sử..."
-                    value={formData.history}
-                    onChange={(e) => setFormData({ ...formData, history: e.target.value })}
-                  />
-                </div>
-
-                <div className="md:col-span-1">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Chất liệu</label>
-                  <input
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow outline-none transition-all"
-                    value={formData.material}
-                    onChange={(e) => setFormData({ ...formData, material: e.target.value })}
-                  />
-                </div>
-
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Quốc gia (Country ID)</label>
-                  <input
-                    type="number"
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow outline-none transition-all"
-                    value={formData.countryId}
-                    onChange={(e) => setFormData({ ...formData, countryId: Number(e.target.value) })}
-                    min={1}
-                    required
-                  />
-                </div>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Link Cờ Quốc gia (Flag URL)</label>
+                  <div className="relative">
+                    <input
+                      className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
+                      value={formData.flagImageUrl}
+                      onChange={(e) => setFormData({ ...formData, flagImageUrl: e.target.value })}
+                      placeholder="https://example.com/flag.png"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Hoặc upload file bên dưới (nếu BE hỗ trợ)</p>
+                  </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh</label>
-                  <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
+                  <div className="mt-4 border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleImageChange}
+                      onChange={handleFlagChange}
                       className="absolute inset-0 opacity-0 cursor-pointer z-10"
                     />
                     {previewUrl ? (
                       <div className="relative inline-block">
-                        <img src={previewUrl} alt="preview" className="max-h-56 object-contain rounded-2xl shadow-pop" />
+                        <img src={previewUrl} alt="flag preview" className="max-h-56 object-contain rounded-2xl shadow-pop" />
                         <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="text-white font-bold text-xl">Thay đổi</span>
                         </div>
@@ -186,7 +180,7 @@ export default function UniformManager() {
                       <>
                         <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                         <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                          Click hoặc kéo thả ảnh (tối đa 5MB)
+                          Upload cờ (tối đa 5MB) - nếu BE hỗ trợ
                         </p>
                       </>
                     )}
@@ -221,37 +215,35 @@ export default function UniformManager() {
           <thead className="bg-brand-bg text-brand-redDark text-sm font-bold uppercase tracking-wider">
             <tr>
               <th className="p-5">ID</th>
-              <th className="p-5">Ảnh</th>
-              <th className="p-5">Tên</th>
-              <th className="p-5">Quốc gia</th>
-              <th className="p-5">Ngày tạo</th>
+              <th className="p-5">Cờ</th>
+              <th className="p-5">Tên Quốc gia</th>
+              <th className="p-5">Châu lục</th>
               <th className="p-5 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-red/10">
-            {items.map((item) => (
-              <tr key={item.id} className="hover:bg-brand-bg/60 transition-colors">
-                <td className="p-5 text-brand-text font-mono">#{item.id}</td>
+            {countries.map((country) => (
+              <tr key={country.id} className="hover:bg-brand-bg/60 transition-colors">
+                <td className="p-5 text-brand-text font-mono">#{country.id}</td>
                 <td className="p-5">
                   <div className="w-20 h-20 rounded-2xl overflow-hidden bg-brand-bg border-2 border-brand-yellow/30 shadow-pop">
-                    {item.images?.[0]?.imageUrl ? ( // BE dùng imageUrl
-                      <img src={item.images[0].imageUrl} alt="" className="w-full h-full object-cover" />
+                    {country.flagImageUrl ? (
+                      <img src={country.flagImageUrl} alt="flag" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-brand-text/50">No img</div>
+                      <div className="w-full h-full flex items-center justify-center text-xs text-brand-text/50">
+                        <Globe size={32} />
+                      </div>
                     )}
                   </div>
                 </td>
-                <td className="p-5 font-bold text-brand-text text-lg">{item.name}</td>
-                <td className="p-5 text-brand-text/70">{item.country?.countryName || "-"}</td>
-                <td className="p-5 text-brand-text/70">
-                  {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "-"}
-                </td>
+                <td className="p-5 font-bold text-brand-text text-lg">{country.countryName}</td>
+                <td className="p-5 text-brand-text/70">{country.continent || "-"}</td>
                 <td className="p-5 text-right space-x-3">
                   <button className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors">
                     <Edit size={22} />
                   </button>
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDelete(country.id)}
                     className="p-3 text-brand-red hover:bg-brand-red/10 rounded-xl transition-colors"
                   >
                     <Trash2 size={22} />
@@ -260,10 +252,10 @@ export default function UniformManager() {
               </tr>
             ))}
 
-            {items.length === 0 && (
+            {countries.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-16 text-center text-brand-text/50 italic text-xl">
-                  Chưa có quân trang nào
+                <td colSpan={5} className="p-16 text-center text-brand-text/50 italic text-xl">
+                  Chưa có quốc gia nào
                 </td>
               </tr>
             )}
