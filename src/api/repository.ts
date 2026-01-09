@@ -1,76 +1,90 @@
 // src/api/repository.ts
-import client from "@/api/client"; // Giữ client để gọi API thật
+import { adminApi } from "@/api/adminApi";
 import type { Country, EquipmentItem } from "@/types/models";
 
-// Helper để map dữ liệu từ BE -> FE (giữ nguyên vì hữu ích)
 function mapUniformToEquipment(u: any): EquipmentItem {
   return {
     id: u.id,
-    slug: u.id.toString(), // Dùng ID làm slug tạm thời
+    slug: u.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, ""),
     name: u.name,
     description: u.description || "",
-    // Gộp lịch sử và chất liệu vào nội dung chi tiết
-    content: `<strong>Chất liệu:</strong> ${u.material}\n\n<strong>Lịch sử:</strong>\n${u.history || "Chưa có thông tin."}`,
-    excerpt: u.description,
-    categorySlug: "trang-bi", // Hardcode tạm để hiện ra list
-    images: u.images ? u.images.map((img: any) => ({
-      id: img.id,
-      imageUrl: img.imageUrl,
-      caption: img.description
-    })) : []
+    content: `<strong>Chất liệu:</strong> ${u.material || "Chưa có thông tin"}\n\n<strong>Lịch sử:</strong>\n${u.history || "Chưa có thông tin."}`,
+    excerpt: u.description || "",
+    categorySlug: "trang-bi",
+    images: u.images
+      ? u.images.map((img: any) => ({
+          id: img.id,
+          imageUrl: img.imageUrl,
+          caption: img.description || "",
+        }))
+      : [],
+    country: u.country
+      ? {
+          id: u.country.id,
+          slug: u.country.countryName
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, ""),
+          name: u.country.countryName,
+          continent: u.country.continent,
+          flagImageUrl: u.country.flagImageUrl,
+        }
+      : undefined,
   };
 }
 
 export const repo = {
-  // 1. Lấy danh sách Quốc gia (dùng API thật)
   async getCountries(): Promise<Country[]> {
     try {
-      const res = await client.get("/countries");
-      // Map dữ liệu BE trả về sang format FE cần
-      return res.data.map((c: any) => ({
+      const raw = await adminApi.getAllCountries();
+      return raw.map((c: any) => ({
         id: c.id,
-        slug: c.id.toString(), // Tạm dùng ID làm slug
-        name: c.countryName,   // BE là countryName
-        description: c.description
+        slug: c.countryName
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, ""),
+        name: c.countryName,
+        continent: c.continent,
+        flagImageUrl: c.flagImageUrl,
+        description: c.description || "",
       }));
     } catch (e) {
-      console.error("Lỗi lấy countries", e);
+      console.error("Lỗi lấy countries:", e);
       return [];
     }
   },
 
-  // 2. Lấy danh sách Quân trang (Uniforms) - dùng API thật
   async getEquipmentItems(): Promise<EquipmentItem[]> {
     try {
-      // Gọi API lấy tất cả (Page 0, Size 100 để lấy nhiều)
-      const res = await client.get("/uniforms?page=0&size=100");
-      const list = res.data.content || []; // Spring Page trả về trong .content
+      const raw = await adminApi.getAllUniforms();
+      const list = Array.isArray(raw) ? raw : raw.content || [];
       return list.map(mapUniformToEquipment);
     } catch (e) {
-      console.error("Lỗi lấy uniforms", e);
+      console.error("Lỗi lấy uniforms:", e);
       return [];
     }
   },
 
-  // Các hàm khác: Trả về rỗng hoặc throw error để buộc build UI mới
-  // (bạn sẽ viết lại sau khi có API thật)
   async getUnits() {
-    console.warn("getUnits chưa có API thật");
-    return Promise.resolve([]); // Trả mảng rỗng để UI không crash
+    console.warn("getUnits - Chưa có API");
+    return [];
   },
 
   async getPeriodArticles() {
-    console.warn("getPeriodArticles chưa có API thật");
-    return Promise.resolve([]);
+    console.warn("getPeriodArticles - Chưa có API");
+    return [];
   },
 
   async getEquipmentCategories() {
-    console.warn("getEquipmentCategories chưa có API thật");
-    return Promise.resolve([]);
+    console.warn("getEquipmentCategories - Chưa có API");
+    return [];
   },
 
   async getPosts() {
-    console.warn("getPosts chưa có API thật");
-    return Promise.resolve([]);
+    console.warn("getPosts - Chưa có API");
+    return [];
   },
 };

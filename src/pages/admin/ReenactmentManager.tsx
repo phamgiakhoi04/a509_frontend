@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import { Plus, Trash2, Edit, UploadCloud, X, Loader2, Globe } from "lucide-react";
 
 export default function ReenactmentManager() {
-  const [countries, setCountries] = useState<any[]>([]);
+  const [countries, setCountries] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +12,6 @@ export default function ReenactmentManager() {
     countryName: "",
     continent: "",
     description: "",
-    flagImageUrl: "", // Nếu không upload file, dùng text input
   });
   const [selectedFlag, setSelectedFlag] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -24,7 +23,6 @@ export default function ReenactmentManager() {
   const fetchCountries = async () => {
     try {
       const data = await adminApi.getAllCountries();
-      // Map thêm slug cho route FE nếu cần (:countrySlug)
       const mapped = data.map((c: any) => ({
         ...c,
         slug: c.countryName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
@@ -52,29 +50,22 @@ export default function ReenactmentManager() {
     setLoading(true);
 
     try {
-      let flagUrl = formData.flagImageUrl;
-
-      if (selectedFlag) {
-        const uploadResult = await adminApi.uploadImage(selectedFlag);
-        flagUrl = uploadResult?.url || uploadResult?.imageUrl;
-        if (!flagUrl) throw new Error("Không upload được cờ quốc gia");
-      }
-
-      const payload = {
-        countryName: formData.countryName,
-        continent: formData.continent,
-        description: formData.description,
-        flagImageUrl: flagUrl,
-      };
-
-      await adminApi.createCountry(payload);
+      await adminApi.createCountry(
+        {
+          countryName: formData.countryName,
+          continent: formData.continent,
+          description: formData.description,
+        },
+        selectedFlag ?? undefined
+      );
 
       setShowForm(false);
-      setFormData({ countryName: "", continent: "", description: "", flagImageUrl: "" });
+      setFormData({ countryName: "", continent: "", description: "" });
       setSelectedFlag(null);
       setPreviewUrl("");
       fetchCountries();
     } catch (error: any) {
+      console.error(error);
       alert(error.response?.data || "Lỗi khi lưu quốc gia");
     } finally {
       setLoading(false);
@@ -82,7 +73,7 @@ export default function ReenactmentManager() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Xác nhận xóa quốc gia này? (Không thể xóa nếu có quân trang liên quan)")) return;
+    if (!window.confirm("Xác nhận xóa quốc gia này?")) return;
 
     try {
       await adminApi.deleteCountry(id);
@@ -151,18 +142,8 @@ export default function ReenactmentManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Link Cờ Quốc gia (Flag URL)</label>
-                  <div className="relative">
-                    <input
-                      className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
-                      value={formData.flagImageUrl}
-                      onChange={(e) => setFormData({ ...formData, flagImageUrl: e.target.value })}
-                      placeholder="https://example.com/flag.png"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">Hoặc upload file bên dưới (nếu BE hỗ trợ)</p>
-                  </div>
-
-                  <div className="mt-4 border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
+                  <label className="block text-lg font-bold text-brand-text mb-3">Cờ Quốc gia</label>
+                  <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
                     <input
                       type="file"
                       accept="image/*"
@@ -180,7 +161,7 @@ export default function ReenactmentManager() {
                       <>
                         <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                         <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                          Upload cờ (tối đa 5MB) - nếu BE hỗ trợ
+                          Upload cờ (tối đa 5MB) - optional
                         </p>
                       </>
                     )}
@@ -222,7 +203,7 @@ export default function ReenactmentManager() {
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-red/10">
-            {countries.map((country) => (
+            {countries.map((country: any) => (
               <tr key={country.id} className="hover:bg-brand-bg/60 transition-colors">
                 <td className="p-5 text-brand-text font-mono">#{country.id}</td>
                 <td className="p-5">

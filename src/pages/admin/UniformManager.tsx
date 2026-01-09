@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
 import { Plus, Trash2, Edit, UploadCloud, X, Loader2 } from "lucide-react";
-import type { EquipmentItem } from "@/types/models";
 
 export default function UniformManager() {
-  const [items, setItems] = useState<EquipmentItem[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,8 +15,8 @@ export default function UniformManager() {
     material: "",
     countryId: 1,
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
     fetchItems();
@@ -26,22 +25,37 @@ export default function UniformManager() {
   const fetchItems = async () => {
     try {
       const data = await adminApi.getAllUniforms();
-      setItems((data.content || data) as EquipmentItem[]);
+      setItems(data);
     } catch (error) {
       console.error("Lỗi tải danh sách:", error);
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Ảnh tối đa 5MB");
-        return;
-      }
-      setSelectedImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    if (files.some((f) => f.size > 5 * 1024 * 1024)) {
+      alert("Mỗi ảnh tối đa 5MB");
+      return;
     }
+    if (files.length + selectedImages.length > 5) {
+      alert("Tối đa 5 ảnh cho một quân trang");
+      return;
+    }
+
+    setSelectedImages((prev) => [...prev, ...files]);
+    setPreviewUrls((prev) => [
+      ...prev,
+      ...files.map((f) => URL.createObjectURL(f)),
+    ]);
+  };
+
+  const removePreview = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,24 +65,25 @@ export default function UniformManager() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("history", formData.history);
-      formDataToSend.append("material", formData.material);
+      formDataToSend.append("description", formData.description || "");
+      formDataToSend.append("history", formData.history || "");
+      formDataToSend.append("material", formData.material || "");
       formDataToSend.append("countryId", formData.countryId.toString());
 
-      if (selectedImage) {
-        formDataToSend.append("imageFiles", selectedImage);
-      }
+      selectedImages.forEach((file) => {
+        formDataToSend.append("imageFiles", file);
+      });
 
       await adminApi.createUniform(formDataToSend);
 
       setShowForm(false);
       setFormData({ name: "", description: "", history: "", material: "", countryId: 1 });
-      setSelectedImage(null);
-      setPreviewUrl("");
+      setSelectedImages([]);
+      setPreviewUrls([]);
       fetchItems();
     } catch (error: any) {
-      alert(error.response?.data?.message || "Lỗi khi lưu quân trang");
+      console.error(error);
+      alert(error.response?.data || "Lỗi khi lưu quân trang");
     } finally {
       setLoading(false);
     }
@@ -76,7 +91,6 @@ export default function UniformManager() {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Xác nhận xóa?")) return;
-
     try {
       await adminApi.deleteUniform(id);
       fetchItems();
@@ -128,7 +142,7 @@ export default function UniformManager() {
                 <div className="md:col-span-2">
                   <label className="block text-lg font-bold text-brand-text mb-3">Mô tả</label>
                   <textarea
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none resize-none transition-all"
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-none transition-all"
                     placeholder="Mô tả chi tiết..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -167,26 +181,39 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh (tối đa 5 ảnh)</label>
                   <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleImageChange}
                       className="absolute inset-0 opacity-0 cursor-pointer z-10"
                     />
-                    {previewUrl ? (
-                      <div className="relative inline-block">
-                        <img src={previewUrl} alt="preview" className="max-h-56 object-contain rounded-2xl shadow-pop" />
-                        <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-white font-bold text-xl">Thay đổi</span>
-                        </div>
+                    {previewUrls.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-4">
+                        {previewUrls.map((url, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={url}
+                              alt={`preview-${idx}`}
+                              className="w-full h-32 object-cover rounded-xl shadow"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePreview(idx)}
+                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <>
                         <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                         <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                          Click hoặc kéo thả ảnh (tối đa 5MB)
+                          Click hoặc kéo thả ảnh (tối đa 5MB mỗi ảnh)
                         </p>
                       </>
                     )}
@@ -234,7 +261,7 @@ export default function UniformManager() {
                 <td className="p-5 text-brand-text font-mono">#{item.id}</td>
                 <td className="p-5">
                   <div className="w-20 h-20 rounded-2xl overflow-hidden bg-brand-bg border-2 border-brand-yellow/30 shadow-pop">
-                    {item.images?.[0]?.imageUrl ? ( // BE dùng imageUrl
+                    {item.images?.[0]?.imageUrl ? (
                       <img src={item.images[0].imageUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-brand-text/50">No img</div>

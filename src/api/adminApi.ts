@@ -1,35 +1,40 @@
 import axiosClient from "./axiosClient";
 
 export const adminApi = {
-  // Upload ảnh chung (nếu BE thêm endpoint này, hoặc tạm dùng cho flag/uniform)
-  uploadImage: async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const { data } = await axiosClient.post("/api/images/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return data; // Giả định trả { url, publicId, ... }
-  },
-
-  // Country APIs - Khớp hoàn toàn BE
   getAllCountries: async () => {
     const { data } = await axiosClient.get("/api/countries");
     return data;
   },
 
-  createCountry: async (countryData: {
+  createCountry: async (countryPayload: {
     countryName: string;
     continent?: string;
     description?: string;
-    flagImageUrl?: string;
-  }) => {
-    const { data } = await axiosClient.post("/api/countries", countryData);
+  }, flagFile?: File) => {
+    const formData = new FormData();
+    formData.append("country", JSON.stringify(countryPayload));
+    if (flagFile) {
+      formData.append("flagFile", flagFile);
+    }
+    const { data } = await axiosClient.post("/api/countries", formData);
     return data;
   },
 
-  updateCountry: async (id: number, countryData: any) => {
-    const { data } = await axiosClient.put(`/api/countries/${id}`, countryData);
+  updateCountry: async (
+    id: number,
+    countryPayload: {
+      countryName: string;
+      continent?: string;
+      description?: string;
+    },
+    flagFile?: File
+  ) => {
+    const formData = new FormData();
+    formData.append("country", JSON.stringify(countryPayload));
+    if (flagFile) {
+      formData.append("flagFile", flagFile);
+    }
+    const { data } = await axiosClient.put(`/api/countries/${id}`, formData);
     return data;
   },
 
@@ -37,22 +42,17 @@ export const adminApi = {
     await axiosClient.delete(`/api/countries/${id}`);
   },
 
-  // Uniform APIs - Khớp BE
   getAllUniforms: async () => {
     const { data } = await axiosClient.get("/api/uniforms");
-    return data.content || data; // BE trả Pageable, lấy content nếu có
+    return data.content || data;
   },
 
   createUniform: async (formData: FormData) => {
-    const { data } = await axiosClient.post("/api/uniforms", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await axiosClient.post("/api/uniforms", formData);
     return data;
   },
 
   deleteUniform: async (id: number) => {
     await axiosClient.delete(`/api/uniforms/${id}`);
   },
-
-  // Nếu cần thêm sau: getById, updateUniform...
 };
