@@ -2,6 +2,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import HomePage from "@/pages/home/HomePage";
+import UniformPage from "@/pages/UniformPage";
+import UniformDetailPage from "@/pages/UniformDetailPage";
+import ReenactmentPage from "@/pages/ReenactmentPage";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
@@ -19,16 +22,15 @@ export default function App() {
         <Route path="/about" element={<div className="min-h-screen bg-white pt-20 text-center">About</div>} />
 
         <Route path="/phuc-dung">
-          <Route index element={<div className="min-h-screen bg-white pt-20 text-center">Phục Dựng</div>} />
+          <Route index element={<ReenactmentPage />} />
           <Route path=":countrySlug" element={<div className="min-h-screen bg-white pt-20 text-center">Theo Quốc gia</div>} />
           <Route path=":countrySlug/:unitSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Đơn vị</div>} />
           <Route path=":countrySlug/:unitSlug/:periodSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết Giai đoạn</div>} />
         </Route>
 
         <Route path="/quan-trang">
-          <Route index element={<div className="min-h-screen bg-white pt-20 text-center">Quân Trang</div>} />
-          <Route path=":categorySlug" element={<div className="min-h-screen bg-white pt-20 text-center">Danh mục</div>} />
-          <Route path=":categorySlug/:itemSlug" element={<div className="min-h-screen bg-white pt-20 text-center">Chi tiết</div>} />
+          <Route index element={<UniformPage />} />
+          <Route path="trang-bi/:itemSlug" element={<UniformDetailPage />} />
         </Route>
 
         <Route path="/tin-tuc" element={<div className="min-h-screen bg-white pt-20 text-center">Tin Tức</div>} />
