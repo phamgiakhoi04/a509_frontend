@@ -48,7 +48,7 @@ export const repo = {
         id: c.id,
         slug: c.countryName
           .toLowerCase()
-          .replace(/\s+/g, "-")
+          .replace(/\s+/g, "-") 
           .replace(/[^a-z0-9-]/g, ""),
         name: c.countryName,
         continent: c.continent,
