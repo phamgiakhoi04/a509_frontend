@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit, UploadCloud, X, Loader2, CheckCircle } from "lucide
 
 export default function UniformManager() {
   const [items, setItems] = useState<any[]>([]);
+  const [countries, setCountries] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +30,7 @@ export default function UniformManager() {
 
   useEffect(() => {
     fetchItems();
+    fetchCountries();
   }, []);
 
   useEffect(() => {
@@ -48,6 +50,15 @@ export default function UniformManager() {
       setItems(data);
     } catch (error) {
       console.error("Lỗi tải danh sách:", error);
+    }
+  };
+
+  const fetchCountries = async () => {
+    try {
+      const data = await adminApi.getAllCountries();
+      setCountries(data || []);
+    } catch (error) {
+      console.error("Lỗi tải danh sách quốc gia:", error);
     }
   };
 
@@ -164,7 +175,7 @@ export default function UniformManager() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Tên hiện vật</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Tên hiện vật *</label>
                   <input
                     className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
                     value={formData.name}
@@ -203,15 +214,20 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Quốc gia (Country ID)</label>
-                  <input
-                    type="number"
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow outline-none transition-all"
+                  <label className="block text-lg font-bold text-brand-text mb-3">Quốc gia *</label>
+                  <select
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all bg-white"
                     value={formData.countryId}
                     onChange={(e) => setFormData({ ...formData, countryId: Number(e.target.value) })}
-                    min={1}
                     required
-                  />
+                  >
+                    <option value="">-- Chọn quốc gia --</option>
+                    {countries.map((c: any) => (
+                      <option key={c.id} value={c.id}>
+                        {c.countryName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="md:col-span-2">

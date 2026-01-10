@@ -71,11 +71,11 @@ export default function EditUniform() {
     if (showSuccessToast) {
       const timer = setTimeout(() => {
         setShowSuccessToast(false);
-      }, 3000);
-
+        navigate("/admin/quan-trang");
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [showSuccessToast]);
+  }, [showSuccessToast, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -141,7 +141,6 @@ export default function EditUniform() {
     } catch (error: any) {
       console.error("Lỗi cập nhật:", error);
       alert(error.response?.data?.message || "Lỗi khi cập nhật quân trang");
-    } finally {
       setSaving(false);
     }
   };
@@ -250,7 +249,7 @@ export default function EditUniform() {
 
           <div className="md:col-span-2">
             <label className="block text-lg font-bold text-brand-text mb-3">
-              Thêm ảnh mới (tổng số ảnh không vượt quá 5)
+              Thêm ảnh mới (Tổng số ảnh không vượt quá 5)
             </label>
             <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
               <input
@@ -283,7 +282,7 @@ export default function EditUniform() {
                 <>
                   <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                   <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                    Click hoặc kéo thả ảnh mới (tối đa 30MB mỗi ảnh)
+                    Click hoặc kéo thả ảnh mới (tối đa 5MB mỗi ảnh)
                   </p>
                 </>
               )}

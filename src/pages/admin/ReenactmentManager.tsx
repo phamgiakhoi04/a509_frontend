@@ -1,9 +1,8 @@
-// src/pages/admin/ReenactmentManager.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
-import { Plus, Trash2, Edit, UploadCloud, X, Loader2, Globe } from "lucide-react";
+import { Plus, Trash2, Edit, UploadCloud, X, Loader2, Globe, CheckCircle } from "lucide-react";
 
 export default function ReenactmentManager() {
   const [countries, setCountries] = useState([]);
@@ -16,11 +15,25 @@ export default function ReenactmentManager() {
   });
   const [selectedFlag, setSelectedFlag] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCountries();
   }, []);
+
+  useEffect(() => {
+    if (showSuccessToast) {
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+        setToastMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessToast]);
 
   const fetchCountries = async () => {
     try {
@@ -65,6 +78,10 @@ export default function ReenactmentManager() {
       setFormData({ countryName: "", continent: "", description: "" });
       setSelectedFlag(null);
       setPreviewUrl("");
+      
+      setToastMessage("Thêm quốc gia thành công!");
+      setShowSuccessToast(true);
+      
       fetchCountries();
     } catch (error: any) {
       alert(error.response?.data || "Lỗi khi lưu quốc gia");
@@ -73,19 +90,29 @@ export default function ReenactmentManager() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Xác nhận xóa quốc gia này?")) return;
+  const requestDelete = (id: number) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    setShowDeleteModal(false);
+    
     try {
-      await adminApi.deleteCountry(id);
+      await adminApi.deleteCountry(deleteId);
+      setToastMessage("Xóa quốc gia thành công!");
+      setShowSuccessToast(true);
       fetchCountries();
     } catch (err: any) {
       alert(err.response?.data || "Không thể xóa quốc gia (có thể có dữ liệu liên quan)");
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
-    <div className="space-y-8 p-8 font-body">
+    <div className="space-y-8 p-8 font-body relative">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
           Quản lý Phục Dựng
@@ -234,7 +261,7 @@ export default function ReenactmentManager() {
                     <Edit size={22} />
                   </button>
                   <button
-                    onClick={() => handleDelete(country.id)}
+                    onClick={() => requestDelete(country.id)}
                     className="p-3 text-brand-red hover:bg-brand-red/10 rounded-xl transition-colors"
                   >
                     <Trash2 size={22} />
@@ -253,6 +280,45 @@ export default function ReenactmentManager() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl border-4 border-brand-yellow/30">
+            <h3 className="text-2xl font-display font-black text-brand-redDark mb-6 text-center">
+              XÁC NHẬN XÓA
+            </h3>
+            <p className="text-brand-text mb-8 text-center">
+              Bạn có chắc chắn muốn xóa quốc gia này? Hành động không thể hoàn tác.
+            </p>
+            <div className="flex justify-center gap-6">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="px-8 py-3 rounded-xl font-bold text-brand-text hover:bg-brand-bg transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-8 py-3 bg-brand-red text-white rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all"
+              >
+                Xác nhận xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 border-2 border-green-400/30">
+            <CheckCircle size={24} className="text-white" />
+            <span className="font-medium text-base">{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
