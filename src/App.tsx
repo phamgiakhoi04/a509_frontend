@@ -1,4 +1,3 @@
-// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import HomePage from "@/pages/home/HomePage";
@@ -12,14 +11,15 @@ import UniformManager from "@/pages/admin/UniformManager";
 import ReenactmentManager from "@/pages/admin/ReenactmentManager";
 import EditUniform from "./pages/admin/edit/EditUniform";
 import EditReenactment from "./pages/admin/edit/EditReenactment";
+import AboutPage from "@/pages/AboutPage";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/gioi-thieu" element={<div className="min-h-screen bg-white pt-20 text-center">Giới Thiệu</div>} />
-        <Route path="/about" element={<div className="min-h-screen bg-white pt-20 text-center">About</div>} />
+        <Route path="/gioi-thieu" element={<AboutPage />} />
+        <Route path="/about" element={<AboutPage />} />
 
         <Route path="/phuc-dung">
           <Route index element={<ReenactmentPage />} />
@@ -49,10 +49,8 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<div className="p-8 text-slate-700">Thống kê & Tổng quan (đang phát triển)</div>} />
-          
           <Route path="quan-trang" element={<UniformManager />} />
           <Route path="phuc-dung" element={<ReenactmentManager />} />
-
           <Route path="quan-trang/edit/:id" element={<EditUniform />} />
           <Route path="phuc-dung/edit/:id" element={<EditReenactment />} />
         </Route>
