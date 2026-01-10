@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
 import { Loader2, Search, Globe, MapPin } from "lucide-react";
 
@@ -94,11 +93,7 @@ export default function ReenactmentPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredCountries.map((country) => (
-              <Link
-                key={country.id}
-                to={`/phuc-dung/${country.id}`}
-                className="group"
-              >
+              <div key={country.id} className="group cursor-default">
                 <div className="bg-white rounded-4xl p-4 border-4 border-brand-bg shadow-pop group-hover:shadow-pop-hover group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                   <div className="aspect-[4/3] rounded-3xl overflow-hidden border-2 border-brand-bg bg-brand-bg/50 relative">
                     {country.flagImageUrl ? (
@@ -112,15 +107,10 @@ export default function ReenactmentPage() {
                         <Globe size={64} className="text-brand-red/40" />
                       </div>
                     )}
-                    {country.continent && (
-                      <div className="absolute top-3 right-3 bg-brand-yellow text-brand-redDark text-xs font-black px-3 py-1 rounded-full uppercase shadow-sm">
-                        {country.continent}
-                      </div>
-                    )}
                   </div>
 
                   <div className="mt-4 px-2 flex-1 flex flex-col">
-                    <h3 className="font-display font-black text-2xl text-brand-redDark line-clamp-2 leading-tight group-hover:text-brand-red transition-colors">
+                    <h3 className="font-display font-black text-2xl text-brand-redDark line-clamp-2 leading-tight">
                       {country.countryName}
                     </h3>
                     
@@ -136,16 +126,9 @@ export default function ReenactmentPage() {
                         {country.description}
                       </p>
                     )}
-
-                    <div className="mt-4 pt-4 border-t-2 border-dashed border-brand-bg flex justify-between items-center">
-                      <span className="font-bold text-brand-red text-sm">Xem chi tiết</span>
-                      <span className="bg-brand-red text-white w-8 h-8 flex items-center justify-center rounded-full font-black group-hover:bg-brand-yellow group-hover:text-brand-redDark transition-colors">
-                        →
-                      </span>
-                    </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

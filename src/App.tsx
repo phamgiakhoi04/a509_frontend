@@ -30,7 +30,7 @@ export default function App() {
 
         <Route path="/quan-trang">
           <Route index element={<UniformPage />} />
-          <Route path="trang-bi/:itemSlug" element={<UniformDetailPage />} />
+          <Route path="trang-bi/:id" element={<UniformDetailPage />} />
         </Route>
 
         <Route path="/tin-tuc" element={<div className="min-h-screen bg-white pt-20 text-center">Tin Tức</div>} />

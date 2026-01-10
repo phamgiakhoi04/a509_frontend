@@ -60,6 +60,17 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+  const handleOpenAuthModal = () => {
+    setShowAuthModal(true);
+  };
+
+  window.addEventListener('openAuthModal', handleOpenAuthModal);
+  return () => {
+    window.removeEventListener('openAuthModal', handleOpenAuthModal);
+  };
+}, []);
+
+  useEffect(() => {
     setIsAdmin(checkIsAdmin(currentUser));
   }, [currentUser]);
 

@@ -1,16 +1,19 @@
 import { ReactNode } from "react";
 
-export type NavItem = { to: string; label: string };
+export type NavItem = { 
+  to: string; 
+  label: string; 
+};
 
 export type User = {
-  roles: any[]; 
   id: number;
   username: string;
   email: string;
   fullName: string;
   phoneNumber?: string;
   avatarUrl?: string;
-  roleName: string; 
+  roleName: string;
+  roles: any[];
 };
 
 export type AuthResponse = {
@@ -19,41 +22,70 @@ export type AuthResponse = {
 };
 
 export type Country = {
-  name: string;
   id: number;
-  countryName?: string;
+  name: string;
+  slug: string;
+  countryName: string;
   continent?: string;
   flagImageUrl?: string;
   description?: string;
-  slug?: string; 
 };
 
 export type EquipmentItem = {
   id: number;
-  slug?: string; 
+  slug: string;
   name: string;
   description?: string;
+  excerpt?: string;
   history?: string;
-  material?: string; 
-  country: Country; 
-  createdAt?: string;
-  updatedAt?: string;
-
-  categorySlug?: string;
+  material?: string;
+  categorySlug: string;
   origin?: string;
   usedBy?: string;
   usedPeriod?: string;
-  excerpt?: string;
-
+  country: Country | null;
   images: {
     id: number;
     imageUrl: string;
-    description?: string;
     caption?: string;
+    description?: string;
   }[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
-export type Unit = { slug: string; countrySlug: string; name: string; description: string };
+export type Uniform = {
+  id: number;
+  name: string;
+  description?: string;
+  history?: string;
+  material?: string;
+  countryId?: number;
+  country?: {
+    id: number;
+    countryName: string;
+  };
+  images?: {
+    id: number;
+    imageUrl: string;
+    description?: string;
+  }[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type CountryOption = {
+  id: number;
+  countryName: string;
+};
+
+export type Unit = { 
+  slug: string; 
+  countrySlug: string; 
+  name: string; 
+  description: string; 
+};
+
 export type PeriodArticle = {
   slug: string;
   countrySlug: string;
@@ -66,8 +98,15 @@ export type PeriodArticle = {
   notes?: string;
   updatedAt: string;
 };
-export type EquipmentCategory = { slug: string; name: string; description: string };
+
+export type EquipmentCategory = { 
+  slug: string; 
+  name: string; 
+  description: string; 
+};
+
 export type PostType = "tai-lieu" | "tin-tuc";
+
 export type Post = {
   type: PostType;
   slug: string;
@@ -77,29 +116,14 @@ export type Post = {
   createdAt: string;
   coverCaption?: string;
 };
+
 export type Comment = {
-  id: string;
-  postType: PostType;
-  postSlug: string;
-  name: string;
-  text: string;
+  id: number;
+  content: string;
+  uniformId: number;
+  userId: number;
+  username: string;
+  userAvatarUrl?: string;
   createdAt: string;
+  updatedAt: string;
 };
-
-export interface Uniform {
-  id: number;
-  name: string;
-  description?: string;
-  history?: string;
-  material?: string;
-  countryId: number;
-  country?: { id: number; countryName: string };
-  images?: Array<{ id: number; imageUrl: string; description?: string }>;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CountryOption {
-  id: number;
-  countryName: string;
-}

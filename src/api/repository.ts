@@ -1,94 +1,68 @@
-// src/api/repository.ts
 import { adminApi } from "@/api/adminApi";
 import type { Country, EquipmentItem } from "@/types/models";
 
-function mapUniformToEquipment(u: any): EquipmentItem {
-  return {
-    id: u.id,
-    slug: u.name
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, ""),
-    name: u.name,
-    description: u.description || "",
-    // content: `<strong>Chất liệu:</strong> ${u.material || "Chưa có thông tin"}\n\n<strong>Lịch sử:</strong>\n${u.history || "Chưa có thông tin."}`,
-    excerpt: u.description || "",
-    categorySlug: "trang-bi",
-    images: u.images
-      ? u.images.map((img: any) => ({
-          id: img.id,
-          imageUrl: img.imageUrl,
-          caption: img.description || "",
-        }))
-      : [],
-    country: u
-      ? {
-          id: u.country.id,
-          slug: u.country.countryName
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, ""),
-          name: u.country.countryName,
-          continent: u.country.continent,
-          flagImageUrl: u.country.flagImageUrl,
-        }
-      : {
-        name: 'ReactNode',
-        id: 1000000000,
-        countryName: 'string'
-      },
-  };
-}
+const createSlug = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
+const mapUniformToEquipment = (uniform: any): EquipmentItem => ({
+  id: uniform.id,
+  slug: createSlug(uniform.name),
+  name: uniform.name,
+  description: uniform.description || "",
+  excerpt: uniform.description || "",
+  categorySlug: "trang-bi",
+  images: uniform.images?.map((img: any) => ({
+    id: img.id,
+    imageUrl: img.imageUrl,
+    caption: img.description || "",
+  })) || [],
+  country: uniform.country
+    ? {
+        id: uniform.country.id,
+        slug: createSlug(uniform.country.countryName),
+        name: uniform.country.countryName,
+        countryName: uniform.country.countryName,
+        continent: uniform.country.continent,
+        flagImageUrl: uniform.country.flagImageUrl,
+      }
+    : null,
+});
 
 export const repo = {
   async getCountries(): Promise<Country[]> {
     try {
-      const raw = await adminApi.getAllCountries();
-      return raw.map((c: any) => ({
-        id: c.id,
-        slug: c.countryName
-          .toLowerCase()
-          .replace(/\s+/g, "-") 
-          .replace(/[^a-z0-9-]/g, ""),
-        name: c.countryName,
-        continent: c.continent,
-        flagImageUrl: c.flagImageUrl,
-        description: c.description || "",
+      const countries = await adminApi.getAllCountries();
+      return countries.map((country: any) => ({
+        id: country.id,
+        slug: createSlug(country.countryName),
+        name: country.countryName,
+        countryName: country.countryName,  // ← THÊM dòng này
+        continent: country.continent,
+        flagImageUrl: country.flagImageUrl,
+        description: country.description || "",
       }));
-    } catch (e) {
-      console.error("Lỗi lấy countries:", e);
+    } catch (error) {
+      console.error("❌ Lỗi lấy danh sách quốc gia:", error);
       return [];
     }
   },
 
   async getEquipmentItems(): Promise<EquipmentItem[]> {
     try {
-      const raw = await adminApi.getAllUniforms();
-      const list = Array.isArray(raw) ? raw : raw.content || [];
-      return list.map(mapUniformToEquipment);
-    } catch (e) {
-      console.error("Lỗi lấy uniforms:", e);
+      const rawData = await adminApi.getAllUniforms();
+      const uniformList = Array.isArray(rawData) ? rawData : rawData.content || [];
+      return uniformList.map(mapUniformToEquipment);
+    } catch (error) {
+      console.error("❌ Lỗi lấy danh sách quân trang:", error);
       return [];
     }
   },
 
-  async getUnits() {
-    console.warn("getUnits - Chưa có API");
-    return [];
-  },
-
-  async getPeriodArticles() {
-    console.warn("getPeriodArticles - Chưa có API");
-    return [];
-  },
-
-  async getEquipmentCategories() {
-    console.warn("getEquipmentCategories - Chưa có API");
-    return [];
-  },
-
   async getPosts() {
-    console.warn("getPosts - Chưa có API");
+    console.warn("⚠️ getPosts - Chưa có API backend");
     return [];
   },
 };

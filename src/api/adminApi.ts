@@ -11,26 +11,22 @@ export const adminApi = {
     return data;
   },
 
-  createCountry: async (countryPayload: {
-    countryName: string;
-    continent?: string;
-    description?: string;
-  }, flagFile?: File) => {
+  createCountry: async (
+    countryPayload: {
+      countryName: string;
+      continent?: string;
+      description?: string;
+    },
+    flagFile?: File
+  ) => {
     const formData = new FormData();
     formData.append("countryName", countryPayload.countryName);
-    if (countryPayload.continent) {
-      formData.append("continent", countryPayload.continent);
-    }
-    if (countryPayload.description) {
-      formData.append("description", countryPayload.description);
-    }
-    if (flagFile) {
-      formData.append("flagFile", flagFile);
-    }
+    if (countryPayload.continent) formData.append("continent", countryPayload.continent);
+    if (countryPayload.description) formData.append("description", countryPayload.description);
+    if (flagFile) formData.append("flagFile", flagFile);
+
     const { data } = await axiosClient.post("/api/countries", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
   },
@@ -46,19 +42,12 @@ export const adminApi = {
   ) => {
     const formData = new FormData();
     formData.append("countryName", countryPayload.countryName);
-    if (countryPayload.continent) {
-      formData.append("continent", countryPayload.continent);
-    }
-    if (countryPayload.description) {
-      formData.append("description", countryPayload.description);
-    }
-    if (flagFile) {
-      formData.append("flagFile", flagFile);
-    }
+    if (countryPayload.continent) formData.append("continent", countryPayload.continent);
+    if (countryPayload.description) formData.append("description", countryPayload.description);
+    if (flagFile) formData.append("flagFile", flagFile);
+
     const { data } = await axiosClient.put(`/api/countries/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
   },
@@ -67,18 +56,10 @@ export const adminApi = {
     await axiosClient.delete(`/api/countries/${id}`);
   },
 
+  // ==================== UNIFORMS ====================
   getAllUniforms: async () => {
     const { data } = await axiosClient.get("/api/uniforms");
     return data.content || data;
-  },
-
-  createUniform: async (formData: FormData) => {
-    const { data } = await axiosClient.post("/api/uniforms", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return data;
   },
 
   getUniformById: async (id: number) => {
@@ -86,11 +67,16 @@ export const adminApi = {
     return data;
   },
 
+  createUniform: async (formData: FormData) => {
+    const { data } = await axiosClient.post("/api/uniforms", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
   updateUniform: async (id: number, formData: FormData) => {
     const { data } = await axiosClient.put(`/api/uniforms/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
   },

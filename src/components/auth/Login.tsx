@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import Button from "@/components/ui/Button";
 import { authApi } from "@/api/authApi";
 import { AlertTriangle } from "lucide-react";
@@ -11,16 +12,15 @@ interface Props {
 }
 
 export default function Login({ onSuccess, onClose, onSwitchRegister, onSwitchForgot }: Props) {
+  const { login: authLogin } = useAuth(); // THÊM DÒNG NÀY
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    // 1. Reset lỗi cũ
     setError("");
 
-    // 2. Validate client
     if (!username || !password) {
       setError("Vui lòng điền đủ thông tin!");
       return;
@@ -28,31 +28,29 @@ export default function Login({ onSuccess, onClose, onSwitchRegister, onSwitchFo
 
     setLoading(true);
     try {
-      // 3. Gọi API (Thêm .trim() để tự động xóa dấu cách thừa khi copy-paste)
       const data = await authApi.login(username.trim(), password);
       
-      // 4. Nếu thành công
+      // Lưu vào localStorage
       authApi.saveToken(data.token, data.userInfo);
+      
+      // CẬP NHẬT AUTHCONTEXT - THÊM DÒNG NÀY
+      authLogin(data.token, data.userInfo);
+      
       onSuccess(data.userInfo);
       onClose();
       
     } catch (err: any) {
-      // 5. XỬ LÝ LỖI MỚI (Dùng .includes để bắt dính mọi biến thể lỗi)
       const data = err.response?.data;
-      
-      // Chuyển lỗi về dạng chuỗi để kiểm tra
       const errorString = typeof data === 'string' 
           ? data 
           : (data?.message || JSON.stringify(data));
 
-      // Kiểm tra: Nếu lỗi có chứa từ "Bad credentials" hoặc status 401
       if (
         err.response?.status === 401 || 
         (errorString && errorString.includes("Bad credentials"))
       ) {
         setError("Sai tên đăng nhập hoặc mật khẩu");
       } else {
-        // Các lỗi khác thì hiển thị như cũ
         setError(typeof data === 'string' ? data : "Đăng nhập thất bại. Vui lòng thử lại.");
       }
     } finally {
@@ -67,7 +65,6 @@ export default function Login({ onSuccess, onClose, onSwitchRegister, onSwitchFo
         <p className="text-brand-text/70 text-sm font-bold mt-1">Chào mừng bạn quay lại với A509</p>
       </div>
 
-      {/* KHỐI HIỂN THỊ LỖI */}
       {error && (
         <div className="bg-red-50 border-l-4 border-brand-red p-3 flex items-start gap-3 rounded-r-lg animate-pulse">
           <AlertTriangle className="text-brand-red shrink-0" size={20} />
@@ -82,7 +79,7 @@ export default function Login({ onSuccess, onClose, onSwitchRegister, onSwitchFo
           value={username} 
           onChange={e => {
             setUsername(e.target.value);
-            setError(""); // Xóa lỗi khi nhập lại
+            setError("");
           }} 
           onKeyDown={e => e.key === 'Enter' && handleLogin()} 
         />
