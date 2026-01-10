@@ -19,9 +19,7 @@ export type UpdateProfileRequest = {
 
 export const authApi = {
   login: async (username: string, password: string) => {
-    console.log('hhhhh');
     const res = await client.post<AuthResponse>("/auth/login", { username, password });
-    console.log(res.data);
     return res.data;
   },
 

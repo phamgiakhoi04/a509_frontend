@@ -48,7 +48,21 @@ export const adminApi = {
   },
 
   createUniform: async (formData: FormData) => {
-    const { data } = await axiosClient.post("/api/uniforms", formData);
+    const { data } = await axiosClient.post("/api/uniforms", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return data;
+  },
+
+  getUniformById: async (id: number) => {
+    const { data } = await axiosClient.get(`/api/uniforms/${id}`);
+    return data;
+  },
+
+  updateUniform: async (id: number, formData: FormData) => {
+    const { data } = await axiosClient.put(`/api/uniforms/${id}`, formData);
     return data;
   },
 

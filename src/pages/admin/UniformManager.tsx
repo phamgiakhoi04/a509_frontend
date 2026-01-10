@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
 import { Plus, Trash2, Edit, UploadCloud, X, Loader2 } from "lucide-react";
@@ -17,6 +18,11 @@ export default function UniformManager() {
   });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
@@ -89,13 +95,21 @@ export default function UniformManager() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Xác nhận xóa?")) return;
+  const requestDelete = (id: number) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    setShowDeleteModal(false);
     try {
-      await adminApi.deleteUniform(id);
+      await adminApi.deleteUniform(deleteId);
       fetchItems();
     } catch (err: any) {
-      alert(err.response?.data || "Không thể xóa");
+      alert(err.response?.data || "Không thể xóa (có thể có dữ liệu liên quan)");
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -243,14 +257,16 @@ export default function UniformManager() {
         </div>
       )}
 
-      <div className="bg-white rounded-3xl shadow-pop overflow-hidden border-2 border-brand-red/10">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-3xl shadow-pop overflow-hidden border-2 border-brand-red/10 overflow-x-auto">
+        <table className="w-full text-left min-w-[1200px]">
           <thead className="bg-brand-bg text-brand-redDark text-sm font-bold uppercase tracking-wider">
             <tr>
               <th className="p-5">ID</th>
               <th className="p-5">Ảnh</th>
-              <th className="p-5">Tên</th>
+              <th className="p-5">Tên hiện vật</th>
               <th className="p-5">Quốc gia</th>
+              <th className="p-5">Mô tả</th>
+              <th className="p-5">Chất liệu</th>
               <th className="p-5">Ngày tạo</th>
               <th className="p-5 text-right">Thao tác</th>
             </tr>
@@ -268,17 +284,26 @@ export default function UniformManager() {
                     )}
                   </div>
                 </td>
-                <td className="p-5 font-bold text-brand-text text-lg">{item.name}</td>
+                <td className="p-5 font-bold text-brand-text text-lg max-w-[200px]">
+                  <div className="line-clamp-2">{item.name}</div>
+                </td>
                 <td className="p-5 text-brand-text/70">{item.country?.countryName || "-"}</td>
-                <td className="p-5 text-brand-text/70">
+                <td className="p-5 text-brand-text/70 max-w-[250px]">
+                  <div className="line-clamp-3">{item.description || "-"}</div>
+                </td>
+                <td className="p-5 text-brand-text/70">{item.material || "-"}</td>
+                <td className="p-5 text-brand-text/70 whitespace-nowrap">
                   {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "-"}
                 </td>
                 <td className="p-5 text-right space-x-3">
-                  <button className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors">
+                  <button
+                    onClick={() => navigate(`/admin/quan-trang/edit/${item.id}`)}
+                    className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors"
+                  >
                     <Edit size={22} />
                   </button>
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => requestDelete(item.id)}
                     className="p-3 text-brand-red hover:bg-brand-red/10 rounded-xl transition-colors"
                   >
                     <Trash2 size={22} />
@@ -289,7 +314,7 @@ export default function UniformManager() {
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-16 text-center text-brand-text/50 italic text-xl">
+                <td colSpan={8} className="p-16 text-center text-brand-text/50 italic text-xl">
                   Chưa có quân trang nào
                 </td>
               </tr>
@@ -297,6 +322,36 @@ export default function UniformManager() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl border-4 border-brand-yellow/30">
+            <h3 className="text-2xl font-display font-black text-brand-redDark mb-6 text-center">
+              XÁC NHẬN XÓA
+            </h3>
+            <p className="text-brand-text mb-8 text-center">
+              Bạn có chắc chắn muốn xóa quân trang này? Hành động không thể hoàn tác.
+            </p>
+            <div className="flex justify-center gap-6">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="px-8 py-3 rounded-xl font-bold text-brand-text hover:bg-brand-bg transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-8 py-3 bg-brand-red text-white rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all"
+              >
+                Xác nhận xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

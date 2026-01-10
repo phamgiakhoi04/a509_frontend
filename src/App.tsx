@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/admin/ProtectedRoute";
 
 import UniformManager from "@/pages/admin/UniformManager";
 import ReenactmentManager from "@/pages/admin/ReenactmentManager";
+import EditUniform from "./pages/admin/edit/EditUniform";
 // Uncomment khi có file
 // import DocumentManager from "@/pages/admin/DocumentManager";
 // import NewsManager from "@/pages/admin/NewsManager";
@@ -57,6 +58,7 @@ export default function App() {
           {/* <Route path="tai-lieu" element={<DocumentManager />} /> */}
           {/* <Route path="tin-tuc" element={<NewsManager />} /> */}
           {/* <Route path="users" element={<UserManager />} /> */}
+          <Route path="quan-trang/edit/:id" element={<EditUniform />} />
         </Route>
       </Route>
 

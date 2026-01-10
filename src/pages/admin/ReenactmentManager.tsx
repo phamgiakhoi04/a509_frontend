@@ -161,7 +161,7 @@ export default function ReenactmentManager() {
                       <>
                         <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                         <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                          Upload cờ (tối đa 5MB) - optional
+                          Upload cờ (tối đa 30MB) - optional
                         </p>
                       </>
                     )}
