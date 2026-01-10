@@ -78,7 +78,7 @@ export default function TrangChu() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredItems.map((item) => (
-              <Link key={item.slug} to={`/quan-trang/${item.categorySlug || 'trang-bi'}/${item.slug}`} className="group">
+              <Link key={item.id} to={`/quan-trang/trang-bi/${item.id}`} className="group">
                 <div className="bg-white rounded-4xl p-4 border-4 border-brand-bg shadow-pop group-hover:shadow-pop-hover group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                   {/* Khung ảnh bo tròn */}
                   <div className="aspect-[4/3] rounded-3xl overflow-hidden border-2 border-brand-bg bg-brand-bg/50 relative">
