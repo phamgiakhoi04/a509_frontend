@@ -6,17 +6,32 @@ export const adminApi = {
     return data;
   },
 
+  getCountryById: async (id: number) => {
+    const { data } = await axiosClient.get(`/api/countries/${id}`);
+    return data;
+  },
+
   createCountry: async (countryPayload: {
     countryName: string;
     continent?: string;
     description?: string;
   }, flagFile?: File) => {
     const formData = new FormData();
-    formData.append("country", JSON.stringify(countryPayload));
+    formData.append("countryName", countryPayload.countryName);
+    if (countryPayload.continent) {
+      formData.append("continent", countryPayload.continent);
+    }
+    if (countryPayload.description) {
+      formData.append("description", countryPayload.description);
+    }
     if (flagFile) {
       formData.append("flagFile", flagFile);
     }
-    const { data } = await axiosClient.post("/api/countries", formData);
+    const { data } = await axiosClient.post("/api/countries", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return data;
   },
 
@@ -30,11 +45,21 @@ export const adminApi = {
     flagFile?: File
   ) => {
     const formData = new FormData();
-    formData.append("country", JSON.stringify(countryPayload));
+    formData.append("countryName", countryPayload.countryName);
+    if (countryPayload.continent) {
+      formData.append("continent", countryPayload.continent);
+    }
+    if (countryPayload.description) {
+      formData.append("description", countryPayload.description);
+    }
     if (flagFile) {
       formData.append("flagFile", flagFile);
     }
-    const { data } = await axiosClient.put(`/api/countries/${id}`, formData);
+    const { data } = await axiosClient.put(`/api/countries/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return data;
   },
 
@@ -62,7 +87,11 @@ export const adminApi = {
   },
 
   updateUniform: async (id: number, formData: FormData) => {
-    const { data } = await axiosClient.put(`/api/uniforms/${id}`, formData);
+    const { data } = await axiosClient.put(`/api/uniforms/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return data;
   },
 

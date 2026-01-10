@@ -1,18 +1,14 @@
+// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import HomePage from "@/pages/home/HomePage";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
-
 import AdminLayout from "@/components/admin/AdminLayout";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
-
 import UniformManager from "@/pages/admin/UniformManager";
 import ReenactmentManager from "@/pages/admin/ReenactmentManager";
 import EditUniform from "./pages/admin/edit/EditUniform";
-// Uncomment khi có file
-// import DocumentManager from "@/pages/admin/DocumentManager";
-// import NewsManager from "@/pages/admin/NewsManager";
-// import UserManager from "@/pages/admin/UserManager";
+import EditReenactment from "./pages/admin/edit/EditReenactment";
 
 export default function App() {
   return (
@@ -54,11 +50,9 @@ export default function App() {
           
           <Route path="quan-trang" element={<UniformManager />} />
           <Route path="phuc-dung" element={<ReenactmentManager />} />
-          {/* Uncomment khi có file */}
-          {/* <Route path="tai-lieu" element={<DocumentManager />} /> */}
-          {/* <Route path="tin-tuc" element={<NewsManager />} /> */}
-          {/* <Route path="users" element={<UserManager />} /> */}
+
           <Route path="quan-trang/edit/:id" element={<EditUniform />} />
+          <Route path="phuc-dung/edit/:id" element={<EditReenactment />} />
         </Route>
       </Route>
 

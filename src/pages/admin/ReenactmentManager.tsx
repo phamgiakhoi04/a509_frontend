@@ -1,4 +1,6 @@
+// src/pages/admin/ReenactmentManager.tsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
 import { Plus, Trash2, Edit, UploadCloud, X, Loader2, Globe } from "lucide-react";
@@ -7,7 +9,6 @@ export default function ReenactmentManager() {
   const [countries, setCountries] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [formData, setFormData] = useState({
     countryName: "",
     continent: "",
@@ -15,6 +16,7 @@ export default function ReenactmentManager() {
   });
   const [selectedFlag, setSelectedFlag] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCountries();
@@ -65,7 +67,6 @@ export default function ReenactmentManager() {
       setPreviewUrl("");
       fetchCountries();
     } catch (error: any) {
-      console.error(error);
       alert(error.response?.data || "Lỗi khi lưu quốc gia");
     } finally {
       setLoading(false);
@@ -87,7 +88,7 @@ export default function ReenactmentManager() {
     <div className="space-y-8 p-8 font-body">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
-          Quản lý Phục Dựng (Quốc gia)
+          Quản lý Phục Dựng
         </h1>
         <Button
           onClick={() => setShowForm(true)}
@@ -161,7 +162,7 @@ export default function ReenactmentManager() {
                       <>
                         <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                         <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                          Upload cờ (tối đa 30MB)
+                          Upload cờ (tối đa 5MB)
                         </p>
                       </>
                     )}
@@ -199,6 +200,7 @@ export default function ReenactmentManager() {
               <th className="p-5">Cờ</th>
               <th className="p-5">Tên Quốc gia</th>
               <th className="p-5">Châu lục</th>
+              <th className="p-5">Mô tả</th>
               <th className="p-5 text-right">Thao tác</th>
             </tr>
           </thead>
@@ -219,8 +221,16 @@ export default function ReenactmentManager() {
                 </td>
                 <td className="p-5 font-bold text-brand-text text-lg">{country.countryName}</td>
                 <td className="p-5 text-brand-text/70">{country.continent || "-"}</td>
+                <td className="p-5 text-brand-text/90 max-w-xl">
+                  <div className="line-clamp-3">
+                    {country.description || "Chưa có mô tả"}
+                  </div>
+                </td>
                 <td className="p-5 text-right space-x-3">
-                  <button className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors">
+                  <button
+                    onClick={() => navigate(`/admin/phuc-dung/edit/${country.id}`)}
+                    className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors"
+                  >
                     <Edit size={22} />
                   </button>
                   <button
@@ -235,7 +245,7 @@ export default function ReenactmentManager() {
 
             {countries.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-16 text-center text-brand-text/50 italic text-xl">
+                <td colSpan={6} className="p-16 text-center text-brand-text/50 italic text-xl">
                   Chưa có quốc gia nào
                 </td>
               </tr>
