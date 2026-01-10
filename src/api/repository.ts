@@ -11,7 +11,7 @@ function mapUniformToEquipment(u: any): EquipmentItem {
       .replace(/[^a-z0-9-]/g, ""),
     name: u.name,
     description: u.description || "",
-    content: `<strong>Chất liệu:</strong> ${u.material || "Chưa có thông tin"}\n\n<strong>Lịch sử:</strong>\n${u.history || "Chưa có thông tin."}`,
+    // content: `<strong>Chất liệu:</strong> ${u.material || "Chưa có thông tin"}\n\n<strong>Lịch sử:</strong>\n${u.history || "Chưa có thông tin."}`,
     excerpt: u.description || "",
     categorySlug: "trang-bi",
     images: u.images
@@ -21,7 +21,7 @@ function mapUniformToEquipment(u: any): EquipmentItem {
           caption: img.description || "",
         }))
       : [],
-    country: u.country
+    country: u
       ? {
           id: u.country.id,
           slug: u.country.countryName
@@ -32,7 +32,11 @@ function mapUniformToEquipment(u: any): EquipmentItem {
           continent: u.country.continent,
           flagImageUrl: u.country.flagImageUrl,
         }
-      : undefined,
+      : {
+        name: 'ReactNode',
+        id: 1000000000,
+        countryName: 'string'
+      },
   };
 }
 

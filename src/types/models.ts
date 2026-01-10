@@ -19,9 +19,9 @@ export type AuthResponse = {
 };
 
 export type Country = {
-  name: ReactNode;
+  name: string;
   id: number;
-  countryName: string;
+  countryName?: string;
   continent?: string;
   flagImageUrl?: string;
   description?: string;

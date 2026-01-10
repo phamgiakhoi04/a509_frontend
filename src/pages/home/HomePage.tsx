@@ -30,11 +30,11 @@ export default function TrangChu() {
   return (
     <div className="font-body text-brand-text bg-brand-bg min-h-screen">
       
-      {/* 1. HERO SECTION - Full background với ảnh A509 Header.jpg */}
+      {/* 1. HERO SECTION - Full background với ảnh A509 Header 3.jpg */}
       <section 
         className="relative min-h-[70vh] md:min-h-[85vh] flex items-center bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: "url('/images/A509 Header 2.jpg')"
+          backgroundImage: "url('/images/A509 Header 3.jpg')"
         }}
       >
         {/* Overlay gradient tối để chữ nổi bật trên ảnh */}

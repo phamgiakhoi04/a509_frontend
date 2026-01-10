@@ -283,7 +283,7 @@ export default function EditUniform() {
                 <>
                   <UploadCloud size={64} className="mx-auto mb-4 text-brand-red/60 group-hover:text-brand-yellow transition-colors" />
                   <p className="text-lg font-medium text-brand-text/70 group-hover:text-brand-yellow">
-                    Click hoặc kéo thả ảnh mới (tối đa 5MB mỗi ảnh)
+                    Click hoặc kéo thả ảnh mới (tối đa 30MB mỗi ảnh)
                   </p>
                 </>
               )}

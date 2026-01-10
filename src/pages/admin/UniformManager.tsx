@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
-import { Plus, Trash2, Edit, UploadCloud, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit, UploadCloud, X, Loader2, CheckCircle } from "lucide-react";
 
 export default function UniformManager() {
   const [items, setItems] = useState<any[]>([]);
@@ -22,11 +22,25 @@ export default function UniformManager() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    if (showSuccessToast) {
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+        setToastMessage("");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessToast]);
 
   const fetchItems = async () => {
     try {
@@ -86,6 +100,10 @@ export default function UniformManager() {
       setFormData({ name: "", description: "", history: "", material: "", countryId: 1 });
       setSelectedImages([]);
       setPreviewUrls([]);
+
+      setToastMessage("Thêm quân trang thành công!");
+      setShowSuccessToast(true);
+
       fetchItems();
     } catch (error: any) {
       console.error(error);
@@ -105,6 +123,8 @@ export default function UniformManager() {
     setShowDeleteModal(false);
     try {
       await adminApi.deleteUniform(deleteId);
+      setToastMessage("Xóa quân trang thành công!");
+      setShowSuccessToast(true);
       fetchItems();
     } catch (err: any) {
       alert(err.response?.data || "Không thể xóa (có thể có dữ liệu liên quan)");
@@ -114,7 +134,7 @@ export default function UniformManager() {
   };
 
   return (
-    <div className="space-y-8 p-8 font-body">
+    <div className="space-y-8 p-8 font-body relative">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
           Quản lý Quân trang
@@ -349,6 +369,15 @@ export default function UniformManager() {
                 Xác nhận xóa
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 border-2 border-green-400/30">
+            <CheckCircle size={24} className="text-white" />
+            <span className="font-medium text-base">{toastMessage}</span>
           </div>
         </div>
       )}
