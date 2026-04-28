@@ -4,14 +4,35 @@ import { authApi } from "@/api/authApi";
 import type { User } from "@/types/models";
 import AuthModal from "@/components/auth/AuthModal";
 import Profile from "@/components/auth/Profile";
-import { LogOut, User as UserIcon, ChevronDown, Settings, Shield } from "lucide-react";
+import { LogOut, User as UserIcon, ChevronDown, Settings, Shield, ChevronRight } from "lucide-react";
 
 const navLinks = [
   { to: "/gioi-thieu", label: "GIỚI THIỆU" },
   { to: "/phuc-dung", label: "PHỤC DỰNG" },
-  { to: "/quan-trang", label: "QUÂN TRANG" },
-  { to: "/tai-lieu", label: "TÀI LIỆU" },
-  { to: "/tin-tuc", label: "TIN TỨC" },
+  { 
+    to: "/tai-lieu", 
+    label: "TÀI LIỆU",
+    hasDropdown: true,
+    dropdownItems: [
+      { to: "/tai-lieu/quan-trang", label: "Quân trang" },
+      { to: "/tai-lieu/chia-se-kinh-nghiem", label: "Chia sẻ kinh nghiệm" },
+      { to: "/tai-lieu/goc-nhin", label: "Góc nhìn" },
+      { to: "/tai-lieu/nuoc-ngoai", label: "Nước ngoài" },
+      { to: "/tai-lieu/nghien-cuu", label: "Nghiên cứu" },
+      { to: "/tai-lieu/review", label: "Review" },
+    ]
+  },
+  { 
+    to: "/tin-tuc", 
+    label: "TIN TỨC",
+    hasDropdown: true,
+    dropdownItems: [
+      { to: "/tin-tuc", label: "Tin tức chung" },
+      { to: "/tin-tuc/chia-se-kinh-nghiem", label: "Chia sẻ kinh nghiệm" },
+      { to: "/tin-tuc/goc-nhin", label: "Góc nhìn" },
+      { to: "/tin-tuc/nuoc-ngoai", label: "Nước ngoài" },
+    ]
+  },
   { to: "/lien-he", label: "LIÊN HỆ" },
 ];
 
@@ -103,15 +124,49 @@ export default function Header() {
 
             <nav className="hidden md:flex items-center gap-4 bg-brand-red/30 px-8 py-2.5 rounded-full border border-white/10 backdrop-blur-sm relative z-40">
               {navLinks.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `${navItemClass} ${isActive ? activeNavItemClass : ""}`
-                  }
-                >
-                  {item.label}
-                </NavLink>
+                item.hasDropdown ? (
+                  <div key={item.to} className="relative group">
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `${navItemClass} flex items-center gap-1 ${isActive ? activeNavItemClass : ""}`
+                      }
+                    >
+                      {item.label}
+                      <ChevronDown size={12} className="group-hover:rotate-180 transition-transform" />
+                    </NavLink>
+                    <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left">
+                      <div className="bg-white rounded-xl shadow-2xl border-2 border-brand-yellow overflow-hidden min-w-[200px]">
+                        {item.dropdownItems?.map((dropdownItem) => (
+                          <NavLink
+                            key={dropdownItem.to}
+                            to={dropdownItem.to}
+                            className={({ isActive }) =>
+                              `w-full text-left flex items-center gap-2 px-4 py-3 text-sm font-bold transition-colors ${
+                                isActive 
+                                  ? "bg-brand-red/10 text-brand-redDark" 
+                                  : "text-gray-600 hover:bg-brand-red/10 hover:text-brand-redDark"
+                              }`
+                            }
+                          >
+                            <ChevronRight size={14} className="text-brand-yellow" />
+                            {dropdownItem.label}
+                          </NavLink>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `${navItemClass} ${isActive ? activeNavItemClass : ""}`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                )
               ))}
 
               <div className="w-[1px] h-5 bg-white/30 mx-1"></div>
@@ -210,14 +265,38 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden bg-brand-redDark border-t border-brand-yellow/30 p-4 space-y-2 animate-fade-in shadow-inner">
             {navLinks.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="block font-display font-bold text-white py-3 border-b border-white/5 hover:text-brand-yellow hover:pl-2 transition-all"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
+              item.hasDropdown ? (
+                <div key={item.to} className="border-b border-white/5">
+                  <Link
+                    to={item.to}
+                    className="block font-display font-bold text-white py-3 hover:text-brand-yellow hover:pl-2 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                  <div className="pl-4 space-y-1 pb-2">
+                    {item.dropdownItems?.map((dropdownItem) => (
+                      <Link
+                        key={dropdownItem.to}
+                        to={dropdownItem.to}
+                        className="block font-bold text-white/70 py-2 hover:text-brand-yellow transition-colors text-sm"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {dropdownItem.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="block font-display font-bold text-white py-3 border-b border-white/5 hover:text-brand-yellow hover:pl-2 transition-all"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              )
             ))}
 
             <div className="pt-4 mt-2">

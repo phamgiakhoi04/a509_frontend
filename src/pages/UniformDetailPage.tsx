@@ -18,16 +18,11 @@ export default function UniformDetailPage() {
 
   const fetchDetail = async () => {
     if (!id) return;
-
     try {
       setLoading(true);
       const data = await adminApi.getUniformById(Number(id));
-      console.log("📦 Data nhận được từ API:", data);
-
       if (data && data.id) {
         setItem(data);
-      } else {
-        console.warn("Data không có id:", data);
       }
     } catch (error) {
       console.error("Lỗi khi tải chi tiết quân trang:", error);
@@ -53,10 +48,7 @@ export default function UniformDetailPage() {
       <div className="min-h-screen bg-brand-bg flex items-center justify-center text-center px-4">
         <div>
           <p className="font-display text-3xl text-brand-text/50 mb-6">Không tìm thấy quân trang</p>
-          <Link
-            to="/quan-trang"
-            className="inline-block px-6 py-3 bg-brand-red text-white font-bold rounded-xl hover:bg-brand-redDark transition-all"
-          >
+          <Link to="/quan-trang" className="inline-block px-6 py-3 bg-brand-red text-white font-bold rounded-xl hover:bg-brand-redDark transition-all">
             ← Quay lại danh sách
           </Link>
         </div>
@@ -81,7 +73,6 @@ export default function UniformDetailPage() {
 
       <section className="py-12 md:py-16 container-page">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Hình ảnh */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="bg-white rounded-3xl p-6 shadow-pop border-4 border-brand-yellow/20">
               {item.images?.length > 0 ? (
@@ -93,7 +84,6 @@ export default function UniformDetailPage() {
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </div>
-
                   {item.images.length > 1 && (
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-6">
                       {item.images.map((img: any, idx: number) => (
@@ -106,11 +96,7 @@ export default function UniformDetailPage() {
                               : "border-transparent hover:border-brand-yellow hover:scale-105"
                           }`}
                         >
-                          <img
-                            src={img.imageUrl}
-                            alt={`${item.name} - ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={img.imageUrl} alt={`${item.name} - ${idx + 1}`} className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -124,13 +110,11 @@ export default function UniformDetailPage() {
             </div>
           </div>
 
-          {/* Thông tin chi tiết */}
           <div className="space-y-8 order-1 lg:order-2">
             <div className="bg-white rounded-3xl p-8 shadow-pop border-4 border-brand-yellow/20">
               <h2 className="font-display font-black text-2xl md:text-3xl text-brand-redDark mb-6 pb-4 border-b-4 border-brand-yellow/30">
                 THÔNG TIN CHI TIẾT
               </h2>
-
               <div className="grid gap-6">
                 {item.material && (
                   <div className="flex items-start gap-4">
@@ -141,7 +125,6 @@ export default function UniformDetailPage() {
                     </div>
                   </div>
                 )}
-
                 {item.country?.countryName && (
                   <div className="flex items-start gap-4">
                     <MapPin className="text-brand-red flex-shrink-0 mt-1" size={28} />
@@ -151,7 +134,6 @@ export default function UniformDetailPage() {
                     </div>
                   </div>
                 )}
-
                 {item.createdAt && (
                   <div className="flex items-start gap-4">
                     <Calendar className="text-brand-red flex-shrink-0 mt-1" size={28} />

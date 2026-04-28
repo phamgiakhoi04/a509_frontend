@@ -9,7 +9,7 @@ export default function Footer() {
           <CardContent>
             <div className="font-semibold text-lg">Liên hệ</div>
             <ul className="mt-4 text-sm text-slate-700 space-y-2">
-              <li>Email: phamgiakhoi04@gmail.com</li>
+              <li>Email: a509vietnam@gmail.com</li>
               <li>
                 Facebook:{" "}
                 <a
