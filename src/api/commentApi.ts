@@ -1,6 +1,11 @@
 import axiosClient from "./axiosClient";
 
 export const commentApi = {
+  getCommentsByArticle: async (articleId: number) => {
+    const { data } = await axiosClient.get(`/api/comments/article/${articleId}`);
+    return data;
+  },
+
   getCommentsByUniform: async (uniformId: number) => {
     const { data } = await axiosClient.get(`/api/comments/uniform/${uniformId}`);
     return data;
@@ -11,6 +16,11 @@ export const commentApi = {
       uniformId,
       content,
     });
+    return data;
+  },
+
+  createArticleComment: async (articleId: number, content: string) => {
+    const { data } = await axiosClient.post("/api/comments", { articleId, content });
     return data;
   },
 

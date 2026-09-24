@@ -5,10 +5,13 @@ import { MessageCircle, Send, Edit2, Trash2, User } from "lucide-react";
 import type { Comment } from "@/types/models";
 
 interface CommentSectionProps {
-  uniformId: number;
+  uniformId?: number;
+  articleId?: number;
+  variant?: "default" | "legacy";
 }
 
-export default function CommentSection({ uniformId }: CommentSectionProps) {
+export default function CommentSection({ uniformId, articleId, variant = "default" }: CommentSectionProps) {
+  const legacy = variant === "legacy";
   const { user, isAuthenticated } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,23 +21,22 @@ export default function CommentSection({ uniformId }: CommentSectionProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log("🔍 uniformId nhận được:", uniformId);
-    console.log("🔍 Type của uniformId:", typeof uniformId);
-    console.log("🔍 uniformId có hợp lệ?", uniformId && !isNaN(uniformId));
-  }, [uniformId]);
+  }, [uniformId, articleId]);
 
   useEffect(() => {
-    if (uniformId && !isNaN(uniformId)) {
+    if ((uniformId && !isNaN(uniformId)) || (articleId && !isNaN(articleId))) {
       fetchComments();
     } else {
       console.error("❌ uniformId không hợp lệ:", uniformId);
     }
-  }, [uniformId]);
+  }, [uniformId, articleId]);
 
   const fetchComments = async () => {
     try {
       setLoading(true);
-      const data = await commentApi.getCommentsByUniform(uniformId);
+      const data = articleId
+        ? await commentApi.getCommentsByArticle(articleId)
+        : await commentApi.getCommentsByUniform(uniformId!);
       setComments(data);
     } catch (error) {
       console.error("Lỗi tải comments:", error);
@@ -49,7 +51,8 @@ export default function CommentSection({ uniformId }: CommentSectionProps) {
 
     try {
       setSubmitting(true);
-      await commentApi.createComment(uniformId, newComment.trim());
+      if (articleId) await commentApi.createArticleComment(articleId, newComment.trim());
+      else await commentApi.createComment(uniformId!, newComment.trim());
       setNewComment("");
       fetchComments();
     } catch (error: any) {
@@ -114,15 +117,17 @@ export default function CommentSection({ uniformId }: CommentSectionProps) {
 
   const handleLoginClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.dispatchEvent(new CustomEvent('openAuthModal'));
+    // Login is intentionally kept in the Homepage sidebar. Send readers there
+    // instead of opening a second Login form inside AuthModal.
+    window.location.assign("/");
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 shadow-pop border-4 border-brand-yellow/20">
-      <div className="flex items-center gap-3 mb-6">
-        <MessageCircle className="text-brand-red" size={28} />
-        <h3 className="font-display font-black text-2xl text-brand-redDark">
-          BÌNH LUẬN ({comments.length})
+    <div className={legacy ? "bg-white" : "rounded-3xl border-4 border-brand-yellow/20 bg-white p-8 shadow-pop"}>
+      <div className={legacy ? "mb-4 bg-[#f1f1f1] px-3 py-2" : "mb-6 flex items-center gap-3"}>
+        {!legacy && <MessageCircle className="text-brand-red" size={28} />}
+        <h3 className={legacy ? "font-display text-2xl font-black uppercase text-brand-red" : "font-display text-2xl font-black text-brand-redDark"}>
+          {legacy ? "Ý kiến bạn đọc" : `BÌNH LUẬN (${comments.length})`}
         </h3>
       </div>
 

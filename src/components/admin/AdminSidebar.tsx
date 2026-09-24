@@ -1,6 +1,6 @@
 // src/components/admin/AdminSidebar.tsx
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Shirt, FileText, LayoutList, Newspaper, Users, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Shirt, FileText, LayoutList, Newspaper, Users, Home } from "lucide-react";
 
 export default function AdminSidebar() {
   const location = useLocation();
@@ -16,16 +16,16 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-brand-redDark text-white min-h-screen flex flex-col fixed left-0 top-0 z-50 shadow-2xl">
+    <aside className="w-64 bg-[#292929] text-white min-h-screen flex flex-col fixed left-0 top-0 z-50 border-r-4 border-brand-red shadow-xl">
       <Link 
         to="/admin/dashboard"
-        className="h-16 flex items-center justify-center border-b border-brand-red hover:bg-brand-red/20 transition-colors"
+        className="h-20 flex items-center justify-center border-b border-white/10 hover:bg-[#444] transition-colors"
       >
-        <div className="h-12 w-12 rounded-full bg-brand-bg border-4 border-brand-yellow overflow-hidden flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+          <div className="h-14 w-52 bg-[#1f1f1f] border-b-4 border-brand-yellow overflow-hidden flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
           <img
-            src="/images/A509 Logo.png"
+            src="/images/A509 Research & Reenactment Group.png"
             alt="A509 Logo"
-            className="w-10 h-10 object-cover"
+            className="w-48 h-14 object-contain"
           />
         </div>
       </Link>
@@ -35,10 +35,10 @@ export default function AdminSidebar() {
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-base whitespace-nowrap ${
+            className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all font-bold text-sm whitespace-nowrap ${
               isActive(item.path)
-                ? "bg-brand-yellow text-brand-redDark shadow-pop-hover"
-                : "text-white/90 hover:bg-brand-red hover:text-brand-yellow hover:shadow-pop"
+                  ? "bg-[#444] text-[#f5c400] border-l-4 border-brand-red"
+                : "text-white/90 hover:bg-[#444] hover:text-[#f5c400]"
             }`}
           >
             <item.icon size={20} />
@@ -50,7 +50,7 @@ export default function AdminSidebar() {
       <div className="p-4 border-t border-brand-red">
         <Link 
           to="/"
-          className="flex items-center gap-2 text-white/80 hover:text-brand-yellow transition-colors font-medium"
+          className="flex items-center gap-2 text-white/80 hover:text-brand-red transition-colors font-medium"
         >
           <Home size={18} /> Về trang chủ
         </Link>

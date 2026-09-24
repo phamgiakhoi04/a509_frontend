@@ -1,76 +1,82 @@
-import { useState } from "react";
-
-import LoginForm from "./Login";
 import RegisterForm from "./Register";
 import ForgotPasswordForm from "./ForgotPassword";
+import ResetPasswordForm from "./ResetPasswordForm";
 
-type ViewState = "LOGIN" | "REGISTER" | "FORGOT";
+export type AuthView = "REGISTER" | "FORGOT" | "RESET";
 
 interface AuthModalProps {
   onClose: () => void;
-  onLoginSuccess: (user: any) => void;
+  initialView?: AuthView;
+  resetToken?: string | null;
 }
 
-export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
-  const [view, setView] = useState<ViewState>("LOGIN");
+export default function AuthModal({ onClose, initialView = "REGISTER", resetToken }: AuthModalProps) {
+  const view = initialView;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-brand-redDark/80 backdrop-blur-sm" onClick={onClose}></div>
+      <button
+        type="button"
+        aria-label="Đóng"
+        className="absolute inset-0 cursor-default bg-brand-redDark/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-brand-yellow">
-        <button 
-          onClick={onClose} 
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-brand-bg text-brand-redDark hover:bg-brand-red hover:text-white font-black transition-colors z-10"
+      <div className="relative w-full max-w-md overflow-hidden border border-[#d7d7d7] bg-white shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Đóng"
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center bg-[#f1f1f1] font-bold text-[#555] transition-colors hover:bg-[#c62828] hover:text-white"
         >
           ✕
         </button>
 
         <div className="p-8 pt-10">
-          {view === "LOGIN" && (
-            <LoginForm 
-              onSuccess={onLoginSuccess}
-              onClose={onClose}
-              onSwitchRegister={() => setView("REGISTER")}
-              onSwitchForgot={() => setView("FORGOT")}
-            />
-          )}
-
           {view === "REGISTER" && (
-            <RegisterForm 
-              onSwitchLogin={() => setView("LOGIN")}
-            />
+            <RegisterForm onSwitchLogin={onClose} onRegistered={onClose} />
           )}
 
           {view === "FORGOT" && (
-            <ForgotPasswordForm 
-              onSwitchLogin={() => setView("LOGIN")}
-            />
+            <ForgotPasswordForm onSwitchLogin={onClose} onBackHome={onClose} />
           )}
+
+          {view === "RESET" && (
+            <ResetPasswordForm token={resetToken} onDone={onClose} onBackHome={onClose} embedded />
+          )}
+
         </div>
       </div>
-      
+
       <style>{`
         .input-style {
           width: 100%;
-          border-radius: 1rem;
-          background-color: #f9f7f2;
-          border: 2px solid transparent;
-          padding: 0.75rem 1rem;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #5D4037;
+          border-radius: 0;
+          background-color: #fff;
+          border: 1px solid #ccc;
+          padding: 0.6rem 0.75rem;
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: #333;
           outline: none;
           transition: all 0.2s;
         }
         .input-style:focus {
-          border-color: #C0392B;
-          background-color: #fff;
-          box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.1);
+          border-color: #c62828;
+          box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.12);
         }
-        .input-style::placeholder {
-          color: #a89f91;
-          font-weight: 600;
+        .input-style::placeholder { color: #aaa; font-weight: 400; }
+        .auth-inline-link {
+          appearance: none;
+          box-shadow: none;
+          outline: none;
+          transition: color 150ms ease;
+        }
+        .auth-inline-link:hover,
+        .auth-inline-link:focus,
+        .auth-inline-link:active {
+          background: transparent !important;
+          box-shadow: none;
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 4px; }

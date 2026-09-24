@@ -5,14 +5,14 @@ import { Check, AlertTriangle } from "lucide-react";
 
 interface Props {
   onSwitchLogin: () => void;
+  onRegistered?: () => void;
 }
 
-export default function Register({ onSwitchLogin }: Props) {
+export default function Register({ onSwitchLogin, onRegistered }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(""); // State lưu lỗi
@@ -30,14 +30,18 @@ export default function Register({ onSwitchLogin }: Props) {
 
     setLoading(true);
     try {
-      const payload: RegisterRequest = { username, password, email, fullName, phoneNumber: phone };
+      const payload: RegisterRequest = { username, password, email, fullName };
       await authApi.register(payload);
       
       // Thành công -> Bật giao diện Success
       setSuccess(true);
     } catch (err: any) {
       // Thất bại -> Hiện lỗi màu đỏ
-      setError(err.response?.data || "Đăng ký thất bại. Vui lòng thử lại.");
+      const responseData = err.response?.data;
+      const message = typeof responseData === "string"
+        ? responseData
+        : responseData?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -60,9 +64,9 @@ export default function Register({ onSwitchLogin }: Props) {
 
         <Button 
           className="w-full py-3 bg-brand-redDark text-white hover:bg-brand-red shadow-pop hover:shadow-pop-hover mt-4" 
-          onClick={onSwitchLogin}
+          onClick={onRegistered || onSwitchLogin}
         >
-          ĐĂNG NHẬP NGAY
+          VỀ TRANG CHỦ
         </Button>
       </div>
     );
@@ -88,7 +92,6 @@ export default function Register({ onSwitchLogin }: Props) {
         <input className="input-style" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
         <input className="input-style" type="password" placeholder="Mật khẩu *" value={password} onChange={e => setPassword(e.target.value)} />
         <input className="input-style" placeholder="Họ và tên" value={fullName} onChange={e => setFullName(e.target.value)} />
-        <input className="input-style" placeholder="Số điện thoại" value={phone} onChange={e => setPhone(e.target.value)} />
       </div>
 
       <Button 
@@ -101,7 +104,13 @@ export default function Register({ onSwitchLogin }: Props) {
       </Button>
       
       <div className="text-center text-sm font-bold text-brand-text/80">
-        Đã có tài khoản? <button onClick={onSwitchLogin} className="text-brand-redDark underline hover:text-brand-yellow">Đăng nhập</button>
+        Đã có tài khoản? <button
+          type="button"
+          onClick={onRegistered || (() => window.location.assign("/"))}
+          className="auth-inline-link inline border-0 bg-transparent p-0 align-baseline text-sm font-bold leading-normal text-gray-500 transition-colors hover:bg-transparent hover:text-brand-red focus:bg-transparent active:bg-transparent"
+        >
+          Đăng nhập
+        </button>
       </div>
     </div>
   );

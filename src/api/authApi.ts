@@ -1,5 +1,5 @@
 // src/api/authApi.ts
-import client from "./client";
+import axiosClient from "./axiosClient";
 import type { AuthResponse, User } from "@/types/models";
 
 export type RegisterRequest = {
@@ -7,49 +7,44 @@ export type RegisterRequest = {
   password: string;
   email: string;
   fullName: string;
-  phoneNumber: string;
 };
 
 export type UpdateProfileRequest = {
-  fullName?: string;
-  phoneNumber?: string;
-  email?: string;
   avatarFile?: File | null;
 };
 
 export const authApi = {
   login: async (username: string, password: string) => {
-    const res = await client.post<AuthResponse>("/auth/login", { username, password });
+    const res = await axiosClient.post<AuthResponse>("/api/auth/login", { username, password });
     return res.data;
   },
 
   register: async (data: RegisterRequest) => {
-    const res = await client.post<User>("/auth/register", data);
+    const res = await axiosClient.post<User>("/api/auth/register", data);
     return res.data;
   },
 
   forgotPassword: async (email: string) => {
-    const res = await client.post("/auth/forgot-password", { email });
+    const res = await axiosClient.post("/api/auth/forgot-password", { email: email.trim() });
     return res.data;
   },
 
   resetPassword: async (token: string, newPassword: string) => {
-    const res = await client.post("/auth/reset-password", { token, newPassword });
+    const res = await axiosClient.post("/api/auth/reset-password", { token, newPassword });
     return res.data;
   },
 
   updateProfile: async (data: UpdateProfileRequest) => {
     const formData = new FormData();
-    
-    if (data.fullName) formData.append("fullName", data.fullName);
-    if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
-    if (data.email) formData.append("email", data.email);
-    
+
     if (data.avatarFile) {
       formData.append("avatarFile", data.avatarFile);
     }
 
-    const res = await client.post<User>("/users/profile", formData);
+    // The backend exposes an avatar-only endpoint. Keeping this call aligned
+    // with it avoids posting to the old /users/profile route (which no longer
+    // exists) and also prevents sending fields the profile screen does not edit.
+    const res = await axiosClient.post<User>("/api/users/profile/avatar", formData);
     return res.data;
   },
 

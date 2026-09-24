@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 export type NavItem = { 
   to: string; 
   label: string; 
@@ -13,7 +11,8 @@ export type User = {
   phoneNumber?: string;
   avatarUrl?: string;
   roleName: string;
-  roles: any[];
+  status?: boolean;
+  roles?: { name: string }[];
 };
 
 export type AuthResponse = {
@@ -28,7 +27,6 @@ export type Country = {
   countryName: string;
   continent?: string;
   flagImageUrl?: string;
-  description?: string;
 };
 
 export type EquipmentItem = {
@@ -38,7 +36,6 @@ export type EquipmentItem = {
   description?: string;
   excerpt?: string;
   history?: string;
-  material?: string;
   categorySlug: string;
   origin?: string;
   usedBy?: string;
@@ -59,7 +56,6 @@ export type Uniform = {
   name: string;
   description?: string;
   history?: string;
-  material?: string;
   countryId?: number;
   country?: {
     id: number;
@@ -108,6 +104,7 @@ export type EquipmentCategory = {
 export type PostType = "tai-lieu" | "tin-tuc";
 
 export type Post = {
+  id?: number;
   type: PostType;
   slug: string;
   title: string;
@@ -115,15 +112,77 @@ export type Post = {
   content: string;
   createdAt: string;
   coverCaption?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  coverImageUrl?: string;
+  coverImage?: string;
+  image?: string;
+  images?: { imageUrl?: string; url?: string }[];
+};
+
+export type Article = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content?: string;
+  thumbnailUrl?: string;
+
+  status: "DRAFT" | "PUBLISHED" | string;
+
+  featured: boolean;
+  featuredOrder: number;
+
+  publishedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+
+  authorId?: number;
+  authorName?: string;
+
+  categoryIds: number[];
+};
+
+export type ActivityLog = {
+  id: number;
+  action: string;
+  description?: string;
+  createdAt: string;
+
+  articleId: number;
+  articleSlug?: string;
+  articleTitle: string;
+
+  userId?: number;
+  username?: string;
 };
 
 export type Comment = {
   id: number;
   content: string;
-  uniformId: number;
+  uniformId?: number;
+  articleId?: number;
   userId: number;
   username: string;
   userAvatarUrl?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type ArticleDTO = {
+  id?: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  thumbnailUrl?: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  featured: boolean;
+  featuredOrder: number;
+  publishedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  authorId?: number;
+  authorName?: string;
+  categoryIds: number[];
 };

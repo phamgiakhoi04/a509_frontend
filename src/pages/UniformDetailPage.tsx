@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { adminApi } from "@/api/adminApi";
-import { Loader2, Calendar, MapPin, Package } from "lucide-react";
+import { Loader2, Calendar, MapPin } from "lucide-react";
 import CommentSection from "@/components/CommentSection";
 
 export default function UniformDetailPage() {
@@ -116,15 +116,6 @@ export default function UniformDetailPage() {
                 THÔNG TIN CHI TIẾT
               </h2>
               <div className="grid gap-6">
-                {item.material && (
-                  <div className="flex items-start gap-4">
-                    <Package className="text-brand-red flex-shrink-0 mt-1" size={28} />
-                    <div>
-                      <div className="text-sm font-black text-brand-text/60 uppercase tracking-wider mb-1">Chất liệu</div>
-                      <div className="text-xl font-bold text-brand-text">{item.material}</div>
-                    </div>
-                  </div>
-                )}
                 {item.country?.countryName && (
                   <div className="flex items-start gap-4">
                     <MapPin className="text-brand-red flex-shrink-0 mt-1" size={28} />

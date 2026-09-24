@@ -16,7 +16,6 @@ export default function EditReenactment() {
   const [formData, setFormData] = useState({
     countryName: "",
     continent: "",
-    description: "",
   });
 
   const [existingFlagUrl, setExistingFlagUrl] = useState<string | null>(null);
@@ -38,7 +37,6 @@ export default function EditReenactment() {
         setFormData({
           countryName: countryData.countryName || "",
           continent: countryData.continent || "",
-          description: countryData.description || "",
         });
 
         setExistingFlagUrl(countryData.flagImageUrl || null);
@@ -105,7 +103,6 @@ export default function EditReenactment() {
       const payload = {
         countryName: formData.countryName.trim(),
         continent: formData.continent || "",
-        description: formData.description || "",
       };
 
       await adminApi.updateCountry(Number(id), payload, newFlagFile ?? undefined);
@@ -130,7 +127,7 @@ export default function EditReenactment() {
   if (!country) return null;
 
   return (
-    <div className="p-8 font-body max-w-5xl mx-auto relative">
+    <div className="admin-page mx-auto max-w-5xl bg-white p-8 font-body relative">
       <button
         onClick={() => navigate("/admin/phuc-dung")}
         className="mb-8 flex items-center gap-2 text-brand-text hover:text-brand-red transition-colors font-medium"
@@ -138,11 +135,11 @@ export default function EditReenactment() {
         <ArrowLeft size={20} /> Quay lại danh sách
       </button>
 
-      <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide mb-10">
+      <h1 className="mb-6 border-b-4 border-brand-red pb-3 font-sans text-3xl font-bold uppercase text-brand-redDark">
         CHỈNH SỬA PHỤC DỰNG
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-10 bg-white rounded-3xl p-10 shadow-pop border-4 border-brand-yellow/20">
+      <form onSubmit={handleSubmit} className="admin-edit-form space-y-7 border border-[#ddd] bg-white p-7 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="md:col-span-2">
             <label className="block text-lg font-bold text-brand-text mb-3">Tên Quốc gia *</label>
@@ -160,15 +157,6 @@ export default function EditReenactment() {
               className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
               value={formData.continent}
               onChange={(e) => setFormData({ ...formData, continent: e.target.value })}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-lg font-bold text-brand-text mb-3">Mô tả chi tiết</label>
-            <textarea
-              className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-40 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-none transition-all"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 
@@ -250,6 +238,15 @@ export default function EditReenactment() {
           </Button>
         </div>
       </form>
+      <style>{`
+        .admin-edit-form input, .admin-edit-form select, .admin-edit-form textarea {
+          border: 1px solid #bbb; background: #fff; padding: 12px 14px;
+          color: #333; outline: none; border-radius: 0;
+        }
+        .admin-edit-form input:focus, .admin-edit-form select:focus, .admin-edit-form textarea:focus {
+          border-color: #b51f24; box-shadow: 0 0 0 2px rgba(181,31,36,.12);
+        }
+      `}</style>
 
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

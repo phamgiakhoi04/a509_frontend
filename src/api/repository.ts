@@ -1,5 +1,7 @@
 import { adminApi } from "@/api/adminApi";
-import type { Country, EquipmentItem } from "@/types/models";
+import { articleApi } from "@/api/articleApi";
+import axiosClient from "@/api/axiosClient";
+import type { Country, EquipmentItem, Post, Article, ArticleDTO, ActivityLog } from "@/types/models";
 
 const createSlug = (text: string): string =>
   text
@@ -31,6 +33,14 @@ const mapUniformToEquipment = (uniform: any): EquipmentItem => ({
     : null,
 });
 
+const mapArticle = (article: ArticleDTO): Article => ({
+  ...article,
+  // Published responses always have an id; the fallback only keeps the
+  // shared response type safe for the create/update DTO shape.
+  id: article.id ?? 0,
+  categoryIds: article.categoryIds || [],
+});
+
 export const repo = {
   async getCountries(): Promise<Country[]> {
     try {
@@ -42,7 +52,6 @@ export const repo = {
         countryName: country.countryName,  // ← THÊM dòng này
         continent: country.continent,
         flagImageUrl: country.flagImageUrl,
-        description: country.description || "",
       }));
     } catch (error) {
       console.error("❌ Lỗi lấy danh sách quốc gia:", error);
@@ -61,8 +70,44 @@ export const repo = {
     }
   },
 
-  async getPosts() {
-    console.warn("⚠️ getPosts - Chưa có API backend");
+  async getFeaturedArticles(): Promise<Article[]> {
+  try {
+    return (await articleApi.getFeatured()).map(mapArticle);
+  } catch (error) {
+    console.error("❌ Lỗi lấy bài nổi bật:", error);
+    return [];
+  }
+},
+
+async getLatestArticles(): Promise<Article[]> {
+  try {
+    return (await articleApi.getLatest()).map(mapArticle);
+  } catch (error) {
+    console.error("❌ Lỗi lấy bài viết mới:", error);
+    return [];
+  }
+},
+
+async getArticlesByCategory(categorySlug: string): Promise<Article[]> {
+  try {
+    return (await articleApi.getByCategory(categorySlug)).map(mapArticle);
+  } catch (error) {
+    console.error("❌ Lỗi lấy bài theo danh mục:", error);
+    return [];
+  }
+},
+
+async getActivities(): Promise<ActivityLog[]> {
+  try {
+    const { data } = await axiosClient.get<ActivityLog[]>("/api/activity");
+    return data;
+  } catch (error) {
+    console.error("❌ Lỗi lấy cập nhật:", error);
+    return [];
+  }
+},
+
+  async getPosts(): Promise<Post[]> {
     return [];
   },
 };

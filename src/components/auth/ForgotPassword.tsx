@@ -5,9 +5,10 @@ import { Check, ArrowLeft, AlertTriangle } from "lucide-react";
 
 interface Props {
   onSwitchLogin: () => void;
+  onBackHome?: () => void;
 }
 
-export default function ForgotPassword({ onSwitchLogin }: Props) {
+export default function ForgotPassword({ onSwitchLogin, onBackHome }: Props) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -26,7 +27,17 @@ export default function ForgotPassword({ onSwitchLogin }: Props) {
       await authApi.forgotPassword(email);
       setIsSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data || "Email không tồn tại trong hệ thống");
+      const responseData = err.response?.data;
+      const serverMessage = typeof responseData === "string"
+        ? responseData
+        : responseData?.message || "Email không tồn tại trong hệ thống";
+      // JavaMail returns technical messages such as "Could not parse mail"
+      // when the backend has no valid Gmail sender/App Password.  Replace
+      // those details with an actionable message for the user.
+      const mailConfigError = /could not parse mail|authentication failed|mail authentication/i.test(serverMessage);
+      setError(mailConfigError
+        ? "Hệ thống chưa cấu hình gửi email. Vui lòng liên hệ quản trị viên."
+        : serverMessage);
     } finally {
       setLoading(false);
     }
@@ -53,9 +64,9 @@ export default function ForgotPassword({ onSwitchLogin }: Props) {
 
         <Button 
           className="w-full py-3 bg-brand-redDark text-white hover:bg-brand-red shadow-pop hover:shadow-pop-hover" 
-          onClick={onSwitchLogin}
+          onClick={onBackHome || onSwitchLogin}
         >
-          QUAY LẠI ĐĂNG NHẬP
+          VỀ TRANG CHỦ
         </Button>
       </div>
     );
@@ -98,10 +109,10 @@ export default function ForgotPassword({ onSwitchLogin }: Props) {
       
       <div className="flex justify-center mt-2">
         <button 
-          onClick={onSwitchLogin} 
+          onClick={onBackHome || onSwitchLogin} 
           className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-red transition-colors"
         >
-          <ArrowLeft size={16} /> Quay lại đăng nhập
+          <ArrowLeft size={16} /> Về trang chủ
         </button>
       </div>
     </div>

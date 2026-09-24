@@ -6,16 +6,15 @@ npm install
 npm run dev
 ```
 
-## Dữ liệu local để test
-Sửa file:
-- `src/mocks/data.ts`
+## Kết nối backend
 
-## Khi có backend thật
-1) Tạo `.env` dựa trên `.env.example` và set:
+Frontend gọi các endpoint `/api/...`. Khi chạy local, Vite proxy các request
+đến `http://localhost:8080`. Nếu triển khai khác máy, tạo `.env` với URL host
+của backend (có thể dùng một trong hai tên biến dưới đây):
+
 ```
-VITE_API_BASE_URL="https://api.example.com"
+VITE_API_URL="https://api.example.com"
+# hoặc: VITE_API_BASE_URL="https://api.example.com/api"
 ```
-2) Trong `src/config.ts` đổi:
-```ts
-export const USE_LOCAL_DATA = false;
-```
+
+Không đặt cả hai biến khác nhau; `VITE_API_URL` được ưu tiên.

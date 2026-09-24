@@ -4,9 +4,25 @@ import { adminApi } from "@/api/adminApi";
 import Button from "@/components/ui/Button";
 import { Plus, Trash2, Edit, UploadCloud, X, Loader2, CheckCircle } from "lucide-react";
 
-export default function UniformManager() {
+type UniformManagerProps = {
+  categoryType?: "UNIFORM" | "REENACTMENT";
+  title?: string;
+  editPathPrefix?: string;
+  embedded?: boolean;
+  initialCountryId?: number;
+};
+const slugifyPeriod = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+export default function UniformManager({
+  categoryType = "UNIFORM",
+  title = "Quản lý Quân trang",
+  editPathPrefix = "/admin/quan-trang/edit",
+  embedded = false,
+  initialCountryId,
+}: UniformManagerProps = {}) {
   const [items, setItems] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -14,11 +30,13 @@ export default function UniformManager() {
     name: "",
     description: "",
     history: "",
-    material: "",
-    countryId: 1,
+    countryId: 0,
+    categoryId: "",
+    period: "",
   });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -27,11 +45,21 @@ export default function UniformManager() {
   const [toastMessage, setToastMessage] = useState("");
 
   const navigate = useNavigate();
+  const isReenactment = categoryType === "REENACTMENT";
+  const itemLabel = isReenactment ? "nội dung phục dựng" : "quân trang";
+  const inputTitle = isReenactment ? "TIÊU ĐỀ NỘI DUNG *" : "TÊN HIỆN VẬT *";
+  const visibleCategories = isReenactment
+    ? categories.filter((category) => Number(category.countryId) === Number(formData.countryId))
+    : categories;
+  const selectedForce = visibleCategories.find((category) => String(category.id) === String(formData.categoryId));
+  const visiblePeriods = isReenactment ? (selectedForce?.children || []) : [];
+  const allPeriods = categories.flatMap((category) => category.children || []);
 
   useEffect(() => {
     fetchItems();
     fetchCountries();
-  }, []);
+    fetchCategories();
+  }, [categoryType, initialCountryId]);
 
   useEffect(() => {
     if (showSuccessToast) {
@@ -47,7 +75,10 @@ export default function UniformManager() {
   const fetchItems = async () => {
     try {
       const data = await adminApi.getAllUniforms();
-      setItems(data);
+      const scoped = categoryType === "REENACTMENT"
+        ? (data || []).filter((item: any) => item.category?.categoryType === "REENACTMENT" && (!initialCountryId || Number(item.country?.id) === Number(initialCountryId)))
+        : (data || []).filter((item: any) => !item.category?.categoryType || item.category?.categoryType === "UNIFORM");
+      setItems(scoped);
     } catch (error) {
       console.error("Lỗi tải danh sách:", error);
     }
@@ -57,10 +88,52 @@ export default function UniformManager() {
     try {
       const data = await adminApi.getAllCountries();
       setCountries(data || []);
+      if (data?.length) {
+        setFormData((prev) => ({ ...prev, countryId: prev.countryId || initialCountryId || Number(data[0].id) }));
+      }
     } catch (error) {
       console.error("Lỗi tải danh sách quốc gia:", error);
     }
   };
+
+  useEffect(() => {
+    if (isReenactment && initialCountryId) {
+      setFormData((prev) => ({ ...prev, countryId: initialCountryId, categoryId: "" }));
+    }
+  }, [initialCountryId, isReenactment]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = categoryType === "REENACTMENT"
+        ? await adminApi.getRootCategoriesByType("REENACTMENT")
+        : await adminApi.getCategoriesByType(categoryType);
+      const usable = categoryType === "REENACTMENT"
+        ? ((data || []).find((item: any) => item.categoryName === "Phục dựng trang phục") || (data || [])[0])?.children || []
+        : (data || []);
+      setCategories(usable);
+      if (!isReenactment && usable.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          categoryId: prev.categoryId || String(usable[0].id),
+        }));
+      }
+    } catch (error) {
+      console.error("Lỗi tải danh sách loại quân trang:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isReenactment || !formData.categoryId) return;
+    const belongsToCountry = visibleCategories.some((category) => String(category.id) === String(formData.categoryId));
+    if (!belongsToCountry) setFormData((prev) => ({ ...prev, categoryId: "" }));
+  }, [formData.countryId, formData.categoryId, categories, isReenactment]);
+
+  useEffect(() => {
+    if (!isReenactment || !formData.period) return;
+    if (!visiblePeriods.some((period: any) => (period.slug || slugifyPeriod(period.categoryName)) === formData.period)) {
+      setFormData((prev) => ({ ...prev, period: "" }));
+    }
+  }, [formData.categoryId, formData.countryId, formData.period, categories, isReenactment]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -70,7 +143,7 @@ export default function UniformManager() {
       return;
     }
     if (files.length + selectedImages.length > 5) {
-      alert("Tối đa 5 ảnh cho một quân trang");
+      alert(`Tối đa 5 ảnh cho một ${itemLabel}`);
       return;
     }
 
@@ -79,6 +152,7 @@ export default function UniformManager() {
       ...prev,
       ...files.map((f) => URL.createObjectURL(f)),
     ]);
+    setImageDescriptions((prev) => [...prev, ...files.map(() => "")]);
   };
 
   const removePreview = (index: number) => {
@@ -87,6 +161,7 @@ export default function UniformManager() {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
+    setImageDescriptions((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,27 +173,64 @@ export default function UniformManager() {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description || "");
       formDataToSend.append("history", formData.history || "");
-      formDataToSend.append("material", formData.material || "");
       formDataToSend.append("countryId", formData.countryId.toString());
+      if (!formData.categoryId) {
+        alert(`Vui lòng chọn lực lượng/danh mục cho ${itemLabel}`);
+        setLoading(false);
+        return;
+      }
+      if (isReenactment && !visibleCategories.some((category) => String(category.id) === String(formData.categoryId))) {
+        alert("Lực lượng không thuộc quốc gia đang chọn.");
+        setLoading(false);
+        return;
+      }
+      if (!formData.countryId) {
+        alert("Vui lòng chọn quốc gia");
+        setLoading(false);
+        return;
+      }
+      if (isReenactment && !formData.period) {
+        alert("Vui lòng chọn giai đoạn lịch sử");
+        setLoading(false);
+        return;
+      }
+      if (isReenactment && selectedImages.length === 0) {
+        alert("Nội dung phục dựng cần có ít nhất một ảnh để hiển thị trên website");
+        setLoading(false);
+        return;
+      }
+      formDataToSend.append("categoryId", formData.categoryId);
+      if (categoryType === "REENACTMENT") formDataToSend.append("period", formData.period);
 
       selectedImages.forEach((file) => {
         formDataToSend.append("imageFiles", file);
+      });
+      imageDescriptions.forEach((description) => {
+        formDataToSend.append("imageDescriptions", description);
       });
 
       await adminApi.createUniform(formDataToSend);
 
       setShowForm(false);
-      setFormData({ name: "", description: "", history: "", material: "", countryId: 1 });
+      setFormData({
+        name: "",
+        description: "",
+        history: "",
+        countryId: countries[0]?.id ? Number(countries[0].id) : 0,
+        categoryId: isReenactment ? "" : (categories[0]?.id ? String(categories[0].id) : ""),
+        period: "",
+      });
       setSelectedImages([]);
       setPreviewUrls([]);
+      setImageDescriptions([]);
 
-      setToastMessage("Thêm quân trang thành công!");
+      setToastMessage(`Đã thêm ${itemLabel} thành công!`);
       setShowSuccessToast(true);
 
       fetchItems();
     } catch (error: any) {
       console.error(error);
-      alert(error.response?.data || "Lỗi khi lưu quân trang");
+      alert(error.response?.data || `Lỗi khi lưu ${itemLabel}`);
     } finally {
       setLoading(false);
     }
@@ -134,7 +246,7 @@ export default function UniformManager() {
     setShowDeleteModal(false);
     try {
       await adminApi.deleteUniform(deleteId);
-      setToastMessage("Xóa quân trang thành công!");
+      setToastMessage(`Đã xóa ${itemLabel} thành công!`);
       setShowSuccessToast(true);
       fetchItems();
     } catch (err: any) {
@@ -145,16 +257,21 @@ export default function UniformManager() {
   };
 
   return (
-    <div className="space-y-8 p-8 font-body relative">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-display font-black text-brand-redDark uppercase tracking-wide">
-          Quản lý Quân trang
+    <div className={embedded ? "space-y-6 font-body relative" : "admin-page space-y-8 p-8 font-body relative"}>
+      <div className="flex items-center justify-between gap-6">
+        <h1 className="whitespace-nowrap text-3xl font-display font-black text-brand-redDark uppercase tracking-wide">
+          {title}
         </h1>
         <Button
-          onClick={() => setShowForm(true)}
-          className="bg-brand-red text-white px-6 py-3 rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all flex items-center gap-2"
+          onClick={() => {
+            if (!countries.length) return alert("Hãy hoàn tất bước 1: tạo ít nhất một quốc gia trước.");
+            if (!visibleCategories.length) return alert("Quốc gia này chưa có lực lượng phục dựng.");
+            if (isReenactment && !visiblePeriods.length) return alert("Lực lượng này chưa có giai đoạn. Hãy tạo giai đoạn trước.");
+            setShowForm(true);
+          }}
+          className="shrink-0 bg-brand-red text-white px-5 py-3 rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover transition-all flex items-center gap-2 whitespace-nowrap"
         >
-          <Plus size={22} /> Thêm mới
+          <Plus size={22} /> {isReenactment ? "Thêm nội dung" : "Thêm mới"}
         </Button>
       </div>
 
@@ -169,13 +286,13 @@ export default function UniformManager() {
             </button>
 
             <h2 className="text-3xl font-display font-black text-brand-redDark mb-10 border-b-4 border-brand-yellow/40 pb-4">
-              THÊM QUÂN TRANG MỚI
+              {isReenactment ? "THÊM NỘI DUNG PHỤC DỰNG" : "THÊM QUÂN TRANG MỚI"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Tên hiện vật *</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">{inputTitle}</label>
                   <input
                     className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all"
                     value={formData.name}
@@ -185,31 +302,22 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Mô tả</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">Mở đầu / mô tả</label>
                   <textarea
                     className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-none transition-all"
-                    placeholder="Mô tả chi tiết..."
+                    placeholder={isReenactment ? "Đoạn giới thiệu hiển thị dưới tiêu đề..." : "Mô tả chi tiết..."}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                <div className="md:col-span-1">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Lịch sử sử dụng</label>
+                <div className="md:col-span-2">
+                  <label className="block text-lg font-bold text-brand-text mb-3">Nội dung chi tiết</label>
                   <textarea
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 h-32 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-none transition-all"
-                    placeholder="Lịch sử..."
+                    className="min-h-48 w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow outline-none resize-y transition-all"
+                    placeholder={isReenactment ? "Nội dung lịch sử, diễn giải và thông tin chi tiết..." : "Lịch sử..."}
                     value={formData.history}
                     onChange={(e) => setFormData({ ...formData, history: e.target.value })}
-                  />
-                </div>
-
-                <div className="md:col-span-1">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Chất liệu</label>
-                  <input
-                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow outline-none transition-all"
-                    value={formData.material}
-                    onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                   />
                 </div>
 
@@ -218,7 +326,7 @@ export default function UniformManager() {
                   <select
                     className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all bg-white"
                     value={formData.countryId}
-                    onChange={(e) => setFormData({ ...formData, countryId: Number(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, countryId: Number(e.target.value), ...(isReenactment ? { categoryId: "" } : {}) })}
                     required
                   >
                     <option value="">-- Chọn quốc gia --</option>
@@ -231,7 +339,32 @@ export default function UniformManager() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh (tối đa 5 ảnh)</label>
+                  <label className="block text-lg font-bold text-brand-text mb-3">{isReenactment ? "Lực lượng *" : "Loại quân trang *"}</label>
+                  <select
+                    className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg focus:ring-4 focus:ring-brand-yellow focus:border-brand-yellow outline-none transition-all bg-white"
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, period: "" })}
+                    required
+                  >
+                    <option value="">{isReenactment ? "Chọn lực lượng" : "Chọn loại quân trang"}</option>
+                    {visibleCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.categoryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {categoryType === "REENACTMENT" && <div className="md:col-span-2">
+                  <label className="block text-lg font-bold text-brand-text mb-3">Giai đoạn lịch sử *</label>
+                  <select className="w-full border-2 border-brand-red/30 rounded-xl p-4 text-lg bg-white" value={formData.period} onChange={(e) => setFormData({ ...formData, period: e.target.value })} required>
+                    <option value="">-- Chọn giai đoạn --</option>
+                    {visiblePeriods.map((period: any) => { const value = period.slug || slugifyPeriod(period.categoryName); return <option key={period.id} value={value}>{period.categoryName}</option>; })}
+                  </select>
+                </div>}
+
+                <div className="md:col-span-2">
+                  <label className="block text-lg font-bold text-brand-text mb-3">Hình ảnh {isReenactment ? "* " : ""}(tối đa 5 ảnh)</label>
                   <div className="border-4 border-dashed border-brand-red/30 rounded-3xl p-10 text-center hover:border-brand-yellow transition-all relative group cursor-pointer bg-brand-bg/50">
                     <input
                       type="file"
@@ -241,21 +374,28 @@ export default function UniformManager() {
                       className="absolute inset-0 opacity-0 cursor-pointer z-10"
                     />
                     {previewUrls.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         {previewUrls.map((url, idx) => (
-                          <div key={idx} className="relative group">
+                          <div key={idx} className="group relative rounded-xl border border-brand-red/15 bg-white p-2 shadow-sm">
                             <img
                               src={url}
                               alt={`preview-${idx}`}
-                              className="w-full h-32 object-cover rounded-xl shadow"
+                              className="h-36 w-full rounded-lg object-cover shadow"
                             />
                             <button
                               type="button"
                               onClick={() => removePreview(idx)}
-                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute right-3 top-3 z-20 rounded-full bg-red-600 p-1 text-white opacity-0 transition-opacity hover:bg-red-800 group-hover:opacity-100"
                             >
                               <X size={16} />
                             </button>
+                            <input
+                              value={imageDescriptions[idx] || ""}
+                              onChange={(event) => setImageDescriptions((prev) => prev.map((caption, i) => i === idx ? event.target.value : caption))}
+                              onClick={(event) => event.stopPropagation()}
+                              placeholder="Chú thích ảnh (tùy chọn)"
+                              className="relative z-20 mt-2 w-full rounded-lg border border-brand-red/20 px-3 py-2 text-sm outline-none focus:border-brand-red"
+                            />
                           </div>
                         ))}
                       </div>
@@ -285,7 +425,7 @@ export default function UniformManager() {
                   className="px-10 py-3 bg-brand-red text-white rounded-xl font-bold shadow-pop hover:bg-brand-redDark hover:shadow-pop-hover disabled:opacity-50 flex items-center gap-3 transition-all"
                 >
                   {loading && <Loader2 className="animate-spin" size={22} />}
-                  {loading ? "Đang lưu..." : "Lưu"}
+                  {loading ? "Đang lưu..." : `Lưu ${isReenactment ? "nội dung" : "quân trang"}`}
                 </button>
               </div>
             </form>
@@ -299,10 +439,11 @@ export default function UniformManager() {
             <tr>
               <th className="p-5">ID</th>
               <th className="p-5">Ảnh</th>
-              <th className="p-5">Tên hiện vật</th>
+              <th className="p-5">{isReenactment ? "Nội dung" : "Tên hiện vật"}</th>
               <th className="p-5">Quốc gia</th>
+              {isReenactment && <th className="p-5">Lực lượng</th>}
+              {isReenactment && <th className="p-5">Giai đoạn</th>}
               <th className="p-5">Mô tả</th>
-              <th className="p-5">Chất liệu</th>
               <th className="p-5">Ngày tạo</th>
               <th className="p-5 text-right">Thao tác</th>
             </tr>
@@ -324,16 +465,17 @@ export default function UniformManager() {
                   <div className="line-clamp-2">{item.name}</div>
                 </td>
                 <td className="p-5 text-brand-text/70">{item.country?.countryName || "-"}</td>
+                {isReenactment && <td className="p-5 text-brand-text/70">{item.category?.categoryName || "-"}</td>}
+                {isReenactment && <td className="p-5 text-brand-text/70">{allPeriods.find((period: any) => (period.slug || slugifyPeriod(period.categoryName)) === item.period)?.categoryName || item.period || "-"}</td>}
                 <td className="p-5 text-brand-text/70 max-w-[250px]">
                   <div className="line-clamp-3">{item.description || "-"}</div>
                 </td>
-                <td className="p-5 text-brand-text/70">{item.material || "-"}</td>
                 <td className="p-5 text-brand-text/70 whitespace-nowrap">
                   {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "-"}
                 </td>
                 <td className="p-5 text-right space-x-3">
                   <button
-                    onClick={() => navigate(`/admin/quan-trang/edit/${item.id}`)}
+                    onClick={() => navigate(`${editPathPrefix}/${item.id}`)}
                     className="p-3 text-brand-yellow hover:bg-brand-yellow/20 rounded-xl transition-colors"
                   >
                     <Edit size={22} />
@@ -350,8 +492,8 @@ export default function UniformManager() {
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={8} className="p-16 text-center text-brand-text/50 italic text-xl">
-                  Chưa có quân trang nào
+                <td colSpan={isReenactment ? 10 : 8} className="p-16 text-center text-brand-text/50 italic text-xl">
+                  {isReenactment ? "Chưa có nội dung phục dựng nào" : "Chưa có quân trang nào"}
                 </td>
               </tr>
             )}
@@ -366,7 +508,7 @@ export default function UniformManager() {
               XÁC NHẬN XÓA
             </h3>
             <p className="text-brand-text mb-8 text-center">
-              Bạn có chắc chắn muốn xóa quân trang này? Hành động không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa {itemLabel} này? Hành động không thể hoàn tác.
             </p>
             <div className="flex justify-center gap-6">
               <button

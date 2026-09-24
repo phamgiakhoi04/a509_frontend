@@ -4,10 +4,17 @@ import { authApi } from "@/api/authApi";
 import { motion } from "framer-motion"; // Thư viện animation
 import { Check, X, Lock, Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 
-export default function ResetPasswordForm() {
+interface ResetPasswordFormProps {
+  token?: string | null;
+  onDone?: () => void;
+  onBackHome?: () => void;
+  embedded?: boolean;
+}
+
+export default function ResetPasswordForm({ token: tokenProp, onDone, onBackHome, embedded = false }: ResetPasswordFormProps = {}) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get("token");
+  const token = tokenProp ?? searchParams.get("token") ?? searchParams.get("resetToken");
 
   // State
   const [password, setPassword] = useState("");
@@ -42,7 +49,7 @@ export default function ResetPasswordForm() {
     try {
       await authApi.resetPassword(token, password);
       setSuccess(true);
-      setTimeout(() => navigate("/"), 3000);
+      setTimeout(() => (onDone ? onDone() : navigate("/")), 1800);
     } catch (err: any) {
       setError(err.response?.data || "Mã xác thực đã hết hạn hoặc không đúng.");
     } finally {
@@ -53,11 +60,11 @@ export default function ResetPasswordForm() {
   // --- GIAO DIỆN KHI TOKEN LỖI ---
   if (!token) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
+      <div className={embedded ? "flex items-center justify-center" : "min-h-screen bg-brand-bg flex items-center justify-center p-6"}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl shadow-pop border-4 border-brand-red p-10 text-center max-w-md w-full"
+          className="bg-white p-6 text-center max-w-md w-full"
         >
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-red animate-pulse">
             <X size={40} />
@@ -65,7 +72,7 @@ export default function ResetPasswordForm() {
           <h1 className="text-2xl font-display font-black text-brand-redDark uppercase">Liên kết lỗi</h1>
           <p className="text-brand-text mt-3 font-medium">Đường dẫn bị thiếu mã Token hoặc đã hết hạn.</p>
           <button 
-            onClick={() => navigate("/")} 
+            onClick={onBackHome || (() => navigate("/"))} 
             className="mt-8 px-8 py-3 bg-brand-redDark text-white rounded-xl font-bold hover:bg-brand-red transition shadow-lg hover:shadow-xl w-full"
           >
             Về trang chủ
@@ -77,7 +84,7 @@ export default function ResetPasswordForm() {
 
   // --- GIAO DIỆN CHÍNH ---
   return (
-    <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4 relative overflow-hidden">
+    <div className={embedded ? "flex items-center justify-center" : "min-h-screen bg-brand-bg flex items-center justify-center p-4 relative overflow-hidden"}>
       
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-brand-yellow/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
@@ -87,17 +94,15 @@ export default function ResetPasswordForm() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-brand-yellow/30 relative z-10"
+        className="bg-white w-full max-w-lg overflow-hidden border border-[#d7d7d7] shadow-2xl relative z-10"
       >
         
         {/* Header Gradient */}
-        <div className="bg-gradient-to-r from-brand-redDark to-brand-red p-10 text-center text-white relative overflow-hidden">
+        <div className="bg-white p-6 pb-2 text-center text-brand-redDark relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/30">
-             <Lock className="text-white w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-display font-black uppercase tracking-wide">Đặt lại mật khẩu</h1>
-          <p className="text-white/90 text-sm font-medium mt-2">Thiết lập mật khẩu mới an toàn hơn</p>
+          <Lock className="text-brand-red w-8 h-8 mx-auto mb-2" />
+          <h1 className="text-2xl font-display font-black uppercase tracking-wide">Đặt lại mật khẩu</h1>
+          <p className="text-gray-500 text-sm font-medium mt-2">Thiết lập mật khẩu mới an toàn hơn</p>
         </div>
 
         <div className="p-8 lg:p-10">

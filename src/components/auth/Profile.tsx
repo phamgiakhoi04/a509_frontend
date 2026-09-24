@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import { authApi } from "@/api/authApi";
 import type { User } from "@/types/models";
@@ -6,9 +7,6 @@ import {
   X,
   Camera,
   User as UserIcon,
-  Phone,
-  Mail,
-  Shield,
   Save,
   AlertCircle,
   CheckCircle2,
@@ -21,10 +19,7 @@ interface Props {
 }
 
 export default function Profile({ user, onClose, onUpdateSuccess }: Props) {
-  const [fullName, setFullName] = useState(user.fullName || "");
-  const [phone, setPhone] = useState(user.phoneNumber || "");
-  const [email, setEmail] = useState(user.email || "");
-
+  const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -32,68 +27,81 @@ export default function Profile({ user, onClose, onUpdateSuccess }: Props) {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 30 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setError("File quá lớn! Giới hạn là 50MB.");
-      e.target.value = "";
+    if (!file.type.startsWith("image/")) {
+      setError("Vui lòng chọn tệp hình ảnh.");
+      event.target.value = "";
       return;
     }
 
-    setAvatarPreview(URL.createObjectURL(file));
+    if (file.size > 30 * 1024 * 1024) {
+      setError("Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 30MB.");
+      event.target.value = "";
+      return;
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setAvatarPreview((previousPreview) => {
+      if (previousPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(previousPreview);
+      }
+      return nextPreview;
+    });
     setSelectedFile(file);
+    setError("");
+    setSuccessMsg("");
   };
 
   const handleSave = async () => {
+    if (!selectedFile) {
+      setError("Vui lòng chọn ảnh đại diện mới.");
+      return;
+    }
+
     setError("");
     setSuccessMsg("");
     setLoading(true);
 
     try {
-      const updatedData = await authApi.updateProfile({
-        fullName,
-        phoneNumber: phone,
-        email,
-        avatarFile: selectedFile,
-      });
+      const updatedData = await authApi.updateProfile({ avatarFile: selectedFile });
 
       const freshAvatarUrl = updatedData.avatarUrl
         ? `${updatedData.avatarUrl}${updatedData.avatarUrl.includes("?") ? "&" : "?"}v=${Date.now()}`
-        : undefined;
+        : user.avatarUrl;
+      const updatedUser: User = {
+        ...user,
+        ...updatedData,
+        avatarUrl: freshAvatarUrl,
+      };
 
-      setAvatarPreview(freshAvatarUrl || avatarPreview);
-
-      const current = authApi.getCurrentUser();
-      if (current) {
-        const newUserForStorage = {
-          ...current,
-          ...updatedData,
-        };
-
-        authApi.saveToken(
-          localStorage.getItem("ACCESS_TOKEN") || "",
-          newUserForStorage
-        );
-
-        onUpdateSuccess({
-          ...newUserForStorage,
-          avatarUrl: freshAvatarUrl,
-        });
+      const token = localStorage.getItem("ACCESS_TOKEN");
+      if (token) {
+        authApi.saveToken(token, updatedUser);
       }
+      onUpdateSuccess(updatedUser);
 
-      setSuccessMsg("Đã lưu thành công!");
+      setAvatarPreview(freshAvatarUrl || "");
+      setSelectedFile(null);
+      setSuccessMsg("Đã cập nhật ảnh đại diện!");
 
-      setTimeout(() => {
-        onClose();
-      }, 1500);
+      window.setTimeout(onClose, 900);
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data;
-      const displayMsg =
-        typeof msg === "string" ? msg : "Không thể kết nối Server (Lỗi Mạng/CORS).";
-      setError(displayMsg);
+      const responseData = err.response?.data;
+      const message = typeof responseData === "string"
+        ? responseData
+        : responseData?.message || "Không thể cập nhật ảnh đại diện.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -106,23 +114,23 @@ export default function Profile({ user, onClose, onUpdateSuccess }: Props) {
         onClick={onClose}
       ></div>
 
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-brand-yellow animate-fade-in flex flex-col md:flex-row max-h-[90vh]">
-        <div className="bg-gray-50 md:w-2/5 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 shrink-0 relative">
+      <div className="relative w-full max-w-2xl bg-white shadow-2xl overflow-hidden border border-[#d7d7d7] border-t-4 border-t-brand-red animate-fade-in flex flex-col md:flex-row max-h-[90vh]">
+        <div className="bg-[#f5f5f5] md:w-2/5 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-200 shrink-0 relative">
           <div className="absolute top-0 left-0 w-full h-1 bg-brand-redDark"></div>
 
           <div className="relative group mb-6">
-            <div className="w-36 h-36 rounded-full border-4 border-brand-yellow bg-white overflow-hidden shadow-lg">
+            <div className="w-32 h-32 rounded-full border-4 border-brand-red bg-white overflow-hidden shadow-lg">
               {avatarPreview ? (
                 <img
                   src={avatarPreview}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/default-avatar.png";
+                    e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-brand-bg text-brand-redDark font-black text-5xl">
+              <div className="w-full h-full flex items-center justify-center bg-brand-bg text-brand-redDark font-black text-5xl">
                   {(user.username?.[0] || "U").toUpperCase()}
                 </div>
               )}
@@ -143,18 +151,18 @@ export default function Profile({ user, onClose, onUpdateSuccess }: Props) {
           </div>
 
           <h3 className="font-display font-black text-xl text-brand-redDark uppercase text-center break-words w-full px-2">
-            {fullName || user.username}
+            {user.fullName || user.username}
           </h3>
         </div>
 
         <div className="flex-1 flex flex-col min-w-0 bg-white">
-          <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-20">
+          <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-20">
             <h2 className="text-lg font-display font-black text-brand-redDark uppercase flex items-center gap-2">
-              <UserIcon size={20} className="text-brand-yellow" /> Cập nhật thông tin
+              <UserIcon size={20} className="text-brand-yellow" /> Cập nhật ảnh đại diện
             </h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-brand-red hover:text-white transition-colors"
+              className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-brand-red hover:text-white transition-colors"
             >
               <X size={20} />
             </button>
@@ -173,67 +181,32 @@ export default function Profile({ user, onClose, onUpdateSuccess }: Props) {
             )}
           </div>
 
-          <div className="p-6 overflow-y-auto custom-scrollbar space-y-5 flex-1">
-            <div className="space-y-4">
-              <div className="group">
-                <label className="text-xs font-black text-gray-400 uppercase ml-1 mb-1.5 flex items-center gap-1">
-                  <Shield size={12} /> Tên đăng nhập
-                </label>
-                <div className="w-full px-4 py-3 bg-gray-100 rounded-xl font-bold text-gray-500 cursor-not-allowed flex items-center gap-2">
-                  <span>{user.username}</span>
-                </div>
-              </div>
-
-              <div className="group">
-                <label className="text-xs font-black text-brand-redDark uppercase ml-1 mb-1.5">
-                  Họ và tên
-                </label>
-                <input
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-bg/30 border-2 border-transparent rounded-xl font-bold text-brand-text focus:bg-white focus:border-brand-yellow outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Nhập họ tên"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-black text-brand-redDark uppercase ml-1 mb-1.5 flex items-center gap-1">
-                    <Mail size={12} /> Email
-                  </label>
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-brand-bg/30 border-2 border-transparent rounded-xl font-bold text-brand-text focus:bg-white focus:border-brand-yellow outline-none transition-all"
-                    placeholder="Email"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-black text-brand-redDark uppercase ml-1 mb-1.5 flex items-center gap-1">
-                    <Phone size={12} /> Số điện thoại
-                  </label>
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 bg-brand-bg/30 border-2 border-transparent rounded-xl font-bold text-brand-text focus:bg-white focus:border-brand-yellow outline-none transition-all"
-                    placeholder="SĐT"
-                  />
-                </div>
-              </div>
+          <div className="p-6 flex-1">
+            <div className="border border-dashed border-gray-300 bg-[#fafafa] p-5 text-center text-sm leading-relaxed text-gray-600">
+              Chọn ảnh mới bằng cách di chuột lên ảnh đại diện. Chỉ có ảnh đại diện được thay đổi; tên, email và các thông tin khác vẫn giữ nguyên.
             </div>
+            {(user.roleName === "ADMIN" || user.roles?.some((role) => role.name === "ADMIN")) && (
+              <button
+                type="button"
+                onClick={() => { onClose(); navigate("/admin/dashboard"); }}
+                className="mt-4 w-full border border-brand-red bg-white px-4 py-3 text-sm font-black text-brand-redDark transition-colors hover:bg-brand-red hover:text-white"
+              >
+                ĐI TỚI KHU VỰC ĐĂNG NỘI DUNG / ẢNH
+              </button>
+            )}
           </div>
 
-          <div className="p-5 border-t border-gray-100 bg-gray-50 shrink-0">
+          <div className="p-5 border-t border-gray-200 bg-[#f5f5f5] shrink-0">
             <Button
               onClick={handleSave}
-              disabled={loading}
-              className="w-full py-3.5 bg-brand-redDark text-white font-black text-lg shadow-pop hover:shadow-pop-hover active:scale-95 transition-all flex items-center justify-center gap-2 rounded-xl"
+              disabled={loading || !selectedFile}
+              className="w-full py-3.5 bg-brand-redDark text-white font-black text-lg shadow-pop hover:shadow-pop-hover active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 "ĐANG LƯU..."
               ) : (
                 <>
-                  <Save size={20} /> LƯU THAY ĐỔI
+                  <Save size={20} /> LƯU ẢNH
                 </>
               )}
             </Button>

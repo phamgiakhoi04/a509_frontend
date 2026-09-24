@@ -1,6 +1,16 @@
 import axiosClient from "./axiosClient";
 
 export const adminApi = {
+  getAllUsers: async () => {
+    const { data } = await axiosClient.get("/api/users/admin");
+    return data;
+  },
+
+  setUserStatus: async (id: number, enabled: boolean) => {
+    const { data } = await axiosClient.patch(`/api/users/admin/${id}/status`, null, { params: { enabled } });
+    return data;
+  },
+
   getAllCountries: async () => {
     const { data } = await axiosClient.get("/api/countries");
     return data;
@@ -15,14 +25,12 @@ export const adminApi = {
     countryPayload: {
       countryName: string;
       continent?: string;
-      description?: string;
     },
     flagFile?: File
   ) => {
     const formData = new FormData();
     formData.append("countryName", countryPayload.countryName);
     if (countryPayload.continent) formData.append("continent", countryPayload.continent);
-    if (countryPayload.description) formData.append("description", countryPayload.description);
     if (flagFile) formData.append("flagFile", flagFile);
 
     const { data } = await axiosClient.post("/api/countries", formData, {
@@ -36,14 +44,12 @@ export const adminApi = {
     countryPayload: {
       countryName: string;
       continent?: string;
-      description?: string;
     },
     flagFile?: File
   ) => {
     const formData = new FormData();
     formData.append("countryName", countryPayload.countryName);
     if (countryPayload.continent) formData.append("continent", countryPayload.continent);
-    if (countryPayload.description) formData.append("description", countryPayload.description);
     if (flagFile) formData.append("flagFile", flagFile);
 
     const { data } = await axiosClient.put(`/api/countries/${id}`, formData, {
@@ -58,7 +64,7 @@ export const adminApi = {
 
   // ==================== UNIFORMS ====================
   getAllUniforms: async () => {
-    const { data } = await axiosClient.get("/api/uniforms");
+    const { data } = await axiosClient.get("/api/uniforms?page=0&size=1000&sortBy=id&sortDir=asc");
     return data.content || data;
   },
 
@@ -85,6 +91,15 @@ export const adminApi = {
     await axiosClient.delete(`/api/uniforms/${id}`);
   },
 
+  deleteImage: async (id: number) => {
+    await axiosClient.delete(`/api/images/${id}`);
+  },
+
+  updateImageDescription: async (id: number, description: string) => {
+    const { data } = await axiosClient.patch(`/api/images/${id}`, { description });
+    return data;
+  },
+
   // ==================== UNIFORM CATEGORIES ====================
   getAllCategories: async () => {
     const { data } = await axiosClient.get("/api/uniform-categories");
@@ -107,6 +122,11 @@ export const adminApi = {
     return data;
   },
 
+  getReenactmentCategoriesByCountry: async (countryId: number) => {
+    const { data } = await axiosClient.get(`/api/uniform-categories/reenactment/country/${countryId}`);
+    return data;
+  },
+
   getCategoriesByType: async (type: 'REENACTMENT' | 'UNIFORM' | 'DOCUMENT') => {
     const { data } = await axiosClient.get(`/api/uniform-categories/type/${type}`);
     return data;
@@ -119,25 +139,39 @@ export const adminApi = {
 
   createCategory: async (categoryPayload: { 
     categoryName: string; 
+    slug?: string;
     description?: string;
     categoryType?: 'REENACTMENT' | 'UNIFORM' | 'DOCUMENT';
     parentId?: number;
+    countryId?: number;
     sortOrder?: number;
     icon?: string;
   }) => {
-    const { data } = await axiosClient.post("/api/uniform-categories", categoryPayload);
+    const { parentId, countryId, ...rest } = categoryPayload;
+    const { data } = await axiosClient.post("/api/uniform-categories", {
+      ...rest,
+      ...(parentId ? { parentId } : {}),
+      ...(countryId ? { countryId } : {}),
+    });
     return data;
   },
 
   updateCategory: async (id: number, categoryPayload: { 
     categoryName: string; 
+    slug?: string;
     description?: string;
     categoryType?: 'REENACTMENT' | 'UNIFORM' | 'DOCUMENT';
     parentId?: number;
+    countryId?: number;
     sortOrder?: number;
     icon?: string;
   }) => {
-    const { data } = await axiosClient.put(`/api/uniform-categories/${id}`, categoryPayload);
+    const { parentId, countryId, ...rest } = categoryPayload;
+    const { data } = await axiosClient.put(`/api/uniform-categories/${id}`, {
+      ...rest,
+      ...(parentId ? { parentId } : {}),
+      ...(countryId ? { countryId } : {}),
+    });
     return data;
   },
 
