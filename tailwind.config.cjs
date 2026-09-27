@@ -8,16 +8,16 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          bg: "#FFFBEB",      
-          red: "#C0392B",      
-          redDark: "#922B21",  
+          bg: "#FBF9F5",
+          red: "#9A1B1E",
+          redDark: "#741417",
           yellow: "#F1C40F",   
-          text: "#5D4037",     
+          text: "#2B2927",
         },
       },
       fontFamily: {
-        display: ['"Baloo 2"', 'cursive'], 
-        body: ['"Nunito"', 'sans-serif'],
+        display: ['"Merriweather"', 'Georgia', 'serif'],
+        body: ['"Inter"', 'Arial', 'sans-serif'],
       },
       boxShadow: {
         'pop': '4px 4px 0px 0px rgba(146, 43, 33, 0.2)',

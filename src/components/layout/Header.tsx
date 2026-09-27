@@ -154,7 +154,7 @@ export default function Header() {
           NAVIGATION
           ================================================= */}
 
-      <nav className="border-b-[3px] border-[#c62828] bg-[#292929]">
+      <nav className="border-b-[3px] border-[#9A1B1E] bg-[#292929]">
         {/* -------------------------------------------------
             DESKTOP NAVIGATION
             ------------------------------------------------- */}

@@ -40,7 +40,7 @@ export default function Layout() {
   }, [location.pathname, searchParams]);
 
   return (
-    <div className="min-h-screen bg-[#f3ead2] text-[#222]">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#222]">
       {/* NOTE:
           Khung website chính.
           max-w-[900px] = chiều rộng gần với layout mẫu A509.

@@ -32,7 +32,7 @@ export default function ArticleDetailPage() {
       <article className="min-w-0">
         <div className="bg-[#f1f1f1] px-3 py-2 text-sm text-gray-700">Tin tức&nbsp; / &nbsp;Bài viết</div>
         <Link to="/" className="mt-5 inline-block text-sm font-bold text-brand-red hover:underline">← Về trang chủ</Link>
-        <h1 className="mt-4 font-display text-3xl font-black leading-tight text-black md:text-4xl">{article.title}</h1>
+        <h1 className="mt-4 font-display text-2xl font-black leading-[1.12] text-black md:text-3xl">{article.title}</h1>
         <p className="mt-3 text-base italic text-gray-500">{article.authorName || "A509"} {article.publishedAt && `| ${formatDateTime(article.publishedAt)}`}</p>
         {article.excerpt && <p className="mt-5 text-lg font-bold leading-relaxed text-gray-700">{article.excerpt}</p>}
         {article.thumbnailUrl && <img src={article.thumbnailUrl} alt={article.title} className="mt-6 max-h-[520px] w-full object-cover" />}

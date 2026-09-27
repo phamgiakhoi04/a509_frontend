@@ -5,8 +5,26 @@
 :root { color-scheme: light; }
 
 body {
-  /* Dùng màu kem của brand làm nền chủ đạo */
   @apply bg-brand-bg text-brand-text antialiased;
+}
+
+.homepage {
+  background: #FBF9F5;
+  color: #2B2927;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+.homepage .font-display,
+.homepage h1,
+.homepage h2,
+.homepage h3,
+.homepage h4 {
+  font-family: "Merriweather", Georgia, serif;
+}
+
+.homepage .font-mono,
+.homepage time {
+  font-family: "Courier New", Courier, monospace;
 }
 
 .container-page { 

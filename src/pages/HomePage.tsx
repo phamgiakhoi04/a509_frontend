@@ -128,7 +128,7 @@ export default function TrangChu() {
   const latestArticleList = latestArticles.slice(0, 4);
 
   return (
-    <div className="font-body text-brand-text bg-brand-bg">
+    <div className="homepage font-body bg-brand-bg text-brand-text">
       <main className="mx-auto w-full max-w-[900px] bg-white">
         <div className="px-5 py-4 md:px-10 md:py-5">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_240px]">
@@ -140,9 +140,9 @@ export default function TrangChu() {
               {/* ================= TIN NỔI BẬT ================= */}
 
               <div className="mb-3 flex items-center gap-2 border-b border-[#ddd] pb-2">
-                <span className="text-[20px] text-[#b51f24]">★</span>
+                <span className="text-[20px] text-[#9A1B1E]">★</span>
 
-                <h1 className="font-display text-[22px] font-black uppercase text-[#b51f24]">
+                <h1 className="font-display text-[22px] font-black uppercase text-[#9A1B1E]">
                   Tin nổi bật
                 </h1>
               </div>
@@ -159,15 +159,15 @@ export default function TrangChu() {
                     to={getArticleLink(featuredArticle)}
                     className="group block"
                   >
-                    <div className="aspect-[16/9] w-full overflow-hidden bg-[#eee]">
+                    <div className="aspect-[16/9] w-[calc(100%_-_0.5cm)] overflow-hidden bg-[#eee]">
                       <img
                         src={getArticleImage(featuredArticle)}
                         alt={featuredArticle.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        className="h-full w-[calc(100%+1cm)] max-w-none -translate-x-[1cm] object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                       />
                     </div>
 
-                    <h2 className="mt-2 font-display text-[23px] font-black uppercase leading-[1.05] text-black transition-colors group-hover:text-[#b51f24] md:text-[25px]">
+                    <h2 className="mt-3 text-left font-display text-[20px] font-black uppercase leading-[1.18] tracking-[0.01em] text-black transition-colors group-hover:text-[#9A1B1E] md:text-[22px]">
                       {featuredArticle.title}
                     </h2>
                   </Link>
@@ -189,7 +189,7 @@ export default function TrangChu() {
                           />
                         </div>
 
-                        <h3 className="mt-2 font-display text-[14px] font-bold leading-[1.12] text-[#222] group-hover:text-[#b51f24]">
+                        <h3 className="mt-2 font-display text-[14px] font-bold leading-[1.12] text-[#222] group-hover:text-[#9A1B1E]">
                           {article.title}
                         </h3>
                       </Link>
@@ -206,9 +206,9 @@ export default function TrangChu() {
                   PHỤC DỰNG TRANG PHỤC
                  ================================================= */}
 
-              <div className="mt-7">
+              <div className="mt-4">
                 <div className="border-b-0 bg-[#f1f1f1] px-3 py-2">
-                  <h2 className="font-display text-[19px] font-black uppercase text-[#b51f24]">
+                  <h2 className="font-display text-[19px] font-black uppercase text-[#9A1B1E]">
                     Phục dựng trang phục
                   </h2>
                 </div>
@@ -236,11 +236,11 @@ export default function TrangChu() {
                           {/* Nội dung */}
 
                           <div>
-                            <h3 className="font-display text-[16px] font-black uppercase leading-[1.15] text-[#333] group-hover:text-[#b51f24]">
+                            <h3 className="font-display text-[16px] font-black uppercase leading-[1.15] text-[#333] group-hover:text-[#9A1B1E]">
                               {article.title}
                             </h3>
 
-                            <div className="mt-1 text-[12px] italic text-[#999]">
+                            <div className="mt-1 font-mono text-[12px] italic text-[#999]">
                               A509 &nbsp;|&nbsp;{" "}
                               {formatDateTime(
                                 article.createdAt || article.publishedAt || ""
@@ -284,12 +284,12 @@ export default function TrangChu() {
                     setSearchQuery(event.target.value)
                   }
                   placeholder="Tra cứu..."
-                  className="min-w-0 flex-1 border border-[#ccc] px-2 text-[13px] italic outline-none focus:border-[#b51f24]"
+                  className="min-w-0 flex-1 border border-[#ccc] px-2 text-[13px] italic outline-none focus:border-[#9A1B1E]"
                 />
 
                 <button
                   type="submit"
-                  className="w-[38px] bg-[#1976d2] text-white transition hover:bg-[#125ca5]"
+                  className="w-[38px] bg-[#9A1B1E] text-white transition hover:bg-[#741417]"
                 >
                   &gt;
                 </button>
@@ -297,7 +297,7 @@ export default function TrangChu() {
 
               {/* ================= ĐĂNG NHẬP ================= */}
 
-              <div className="mb-5 bg-[#f1f1f1] p-3">
+              <div className="mb-4 bg-[#f1f1f1] p-3">
                 {!isAuthenticated && (
                   <h2 className="mb-3 font-display text-[16px] font-black uppercase text-[#333]">
                     Đăng nhập
@@ -309,10 +309,10 @@ export default function TrangChu() {
                     <button
                       type="button"
                       onClick={() => setShowProfile(true)}
-                      className="flex min-w-0 items-center gap-2 text-left hover:text-[#b51f24]"
+                      className="flex min-w-0 items-center gap-2 text-left hover:text-[#9A1B1E]"
                       title="Chỉnh sửa ảnh đại diện"
                     >
-                      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#b51f24] bg-white text-center leading-9 text-[14px] font-bold text-[#b51f24]">
+                      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#9A1B1E] bg-white text-center leading-9 text-[14px] font-bold text-[#9A1B1E]">
                         {user.avatarUrl ? (
                           <img
                             src={user.avatarUrl}
@@ -341,7 +341,7 @@ export default function TrangChu() {
                     <button
                       type="button"
                       onClick={logout}
-                      className="shrink-0 text-[#d32f2f] hover:underline"
+                      className="shrink-0 text-[#9A1B1E] hover:underline"
                     >
                       Đăng xuất
                     </button>
@@ -369,7 +369,7 @@ export default function TrangChu() {
                     />
 
                     {loginError && (
-                      <p className="mt-1 text-[11px] text-[#c62828]">
+                      <p className="mt-1 text-[11px] text-[#9A1B1E]">
                         {loginError}
                       </p>
                     )}
@@ -378,7 +378,7 @@ export default function TrangChu() {
                       <button
                         type="submit"
                         disabled={loginLoading}
-                        className="text-[12px] text-[#d32f2f] hover:underline disabled:opacity-50"
+                        className="text-[12px] text-[#9A1B1E] hover:underline disabled:opacity-50"
                       >
                         {loginLoading
                           ? "Đang đăng nhập..."
@@ -392,7 +392,7 @@ export default function TrangChu() {
                             new CustomEvent("openRegisterModal")
                           )
                         }
-                        className="text-[12px] text-[#d32f2f] hover:underline"
+                        className="text-[12px] text-[#9A1B1E] hover:underline"
                       >
                         Đăng ký
                       </button>
@@ -408,7 +408,7 @@ export default function TrangChu() {
                             )
                           )
                         }
-                        className="text-[11px] text-[#777] hover:text-[#c62828] hover:underline"
+                        className="text-[11px] text-[#777] hover:text-[#9A1B1E] hover:underline"
                       >
                         Quên mật khẩu?
                       </button>
@@ -420,23 +420,23 @@ export default function TrangChu() {
               {/* ================= BÀI VIẾT MỚI ================= */}
 
               <div className="mb-5 bg-[#f1f1f1] p-3">
-                <h2 className="mb-3 font-display text-[16px] font-black uppercase text-[#333]">
+                <h2 className="mb-2 font-display text-[16px] font-black uppercase text-[#333]">
                   Bài viết mới
                 </h2>
 
-                <ul className="space-y-2">
+                <ul className="list-disc space-y-1.5 pl-4">
                   {latestArticleList.map((article) => (
                     <li
                       key={article.id}
-                      className="relative pl-3 text-[13px] leading-[1.2]"
+                      className="text-[13px] leading-[1.25]"
                     >
-                      <span className="absolute left-0 top-[2px]">
+                      <span className="hidden">
                         •
                       </span>
 
                       <Link
                         to={getArticleLink(article)}
-                        className="hover:text-[#b51f24]"
+                        className="hover:text-[#9A1B1E]"
                       >
                         {article.title}
                       </Link>
@@ -448,18 +448,18 @@ export default function TrangChu() {
               {/* ================= CẬP NHẬT ================= */}
 
               <div className="bg-[#f1f1f1] p-3">
-                <h2 className="mb-3 font-display text-[16px] font-black uppercase text-[#333]">
+                <h2 className="mb-2 font-display text-[16px] font-black uppercase text-[#333]">
                   Cập nhật
                 </h2>
 
-                <ul className="space-y-3 text-[13px] leading-[1.2]">
+                <ul className="list-disc space-y-2 pl-4 text-[13px] leading-[1.25]">
                   {activities.length > 0 ? (
                     activities.slice(0, 5).map((activity) => (
                       <li
                         key={activity.id}
-                        className="relative pl-3"
+                        className=""
                       >
-                        <span className="absolute left-0">•</span>
+                        <span className="hidden">•</span>
 
                         <Link
                           to={
@@ -467,7 +467,7 @@ export default function TrangChu() {
                               ? `/tin-tuc/${activity.articleSlug}`
                               : "#"
                           }
-                          className="hover:text-[#b51f24]"
+                          className="hover:text-[#9A1B1E]"
                         >
                           {activity.description ||
                             activity.action}
